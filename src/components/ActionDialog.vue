@@ -6,6 +6,7 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import VideoTimelineAction from "@/components/VideoTimelineAction.vue";
 import {
   assetFieldMediaType,
   fieldInputType,
@@ -31,6 +32,13 @@ const values = reactive<Record<string, string>>({});
 
 const fields = computed(() => (props.action ? visibleInputProperties(props.action) : []));
 const required = computed(() => (props.action ? requiredFields(props.action) : new Set<string>()));
+const timelineAsset = computed(() => {
+  if (!props.action || !["video.trim", "video.split"].includes(props.action.id)) {
+    return null;
+  }
+  const [asset] = store.selectedAssets;
+  return asset?.media_type === "video" ? asset : null;
+});
 
 watch(
   () => props.action?.id,
@@ -105,7 +113,17 @@ function submit() {
 </script>
 
 <template>
+  <VideoTimelineAction
+    v-if="action && timelineAsset"
+    :open="open"
+    :action="action"
+    :asset="timelineAsset"
+    @close="emit('close')"
+    @submit="emit('submit', $event)"
+  />
+
   <Dialog
+    v-else
     :open="open && !!action"
     :title="action?.title ?? 'Action'"
     :description="action?.description"
