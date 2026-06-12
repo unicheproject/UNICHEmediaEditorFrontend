@@ -47,10 +47,6 @@ export const useWorkspaceStore = defineStore("workspace", () => {
       projects.value = projectList;
       capabilities.value = capabilityList;
 
-      if (!selectedProjectId.value && projectList.length > 0) {
-        selectedProjectId.value = projectList[0].id;
-      }
-
       if (selectedProjectId.value) {
         await loadProjectData(selectedProjectId.value);
       }

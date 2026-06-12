@@ -1,19 +1,31 @@
 <script setup lang="ts">
 import { AlertCircle } from "lucide-vue-next";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 import ActionPanel from "@/components/ActionPanel.vue";
 import AssetGrid from "@/components/AssetGrid.vue";
 import JobsPanel from "@/components/JobsPanel.vue";
-import ProjectSidebar from "@/components/ProjectSidebar.vue";
+import ProjectSelection from "@/components/ProjectSelection.vue";
+import WorkspaceHeader from "@/components/WorkspaceHeader.vue";
 import Button from "@/components/ui/Button.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
 
 const store = useWorkspaceStore();
+const showingProjects = ref(true);
 
 onMounted(() => {
   void store.loadInitial();
 });
+
+async function openProject(projectId: string) {
+  await store.selectProject(projectId);
+  showingProjects.value = false;
+}
+
+function goHome() {
+  store.clearSelection();
+  showingProjects.value = true;
+}
 </script>
 
 <template>
@@ -29,17 +41,21 @@ onMounted(() => {
       <Button size="sm" variant="ghost" @click="store.setError(null)">Dismiss</Button>
     </div>
 
-    <main class="grid min-h-screen gap-4 p-4 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
-      <ProjectSidebar />
+    <ProjectSelection v-if="showingProjects" @open-project="openProject" />
 
-      <div class="min-h-0">
-        <AssetGrid />
-      </div>
+    <div v-else class="grid min-h-screen grid-rows-[auto_minmax(0,1fr)]">
+      <WorkspaceHeader @home="goHome" />
 
-      <aside class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(260px,0.8fr)]">
-        <ActionPanel />
-        <JobsPanel />
-      </aside>
-    </main>
+      <main class="grid min-h-0 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div class="min-h-0">
+          <AssetGrid />
+        </div>
+
+        <aside class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(260px,0.8fr)]">
+          <ActionPanel />
+          <JobsPanel />
+        </aside>
+      </main>
+    </div>
   </div>
 </template>
