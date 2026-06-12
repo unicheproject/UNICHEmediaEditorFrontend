@@ -25,6 +25,12 @@ const store = useWorkspaceStore();
 const dialogOpen = ref(false);
 const selectedAction = ref<Capability | null>(null);
 const creating = ref(false);
+const hoveredAction = ref<ActionOption | null>(null);
+const tooltipStyle = ref<Record<string, string>>({});
+
+const tooltipWidth = 288;
+const tooltipGap = 12;
+const viewportMargin = 16;
 
 const availableActions = computed<ActionOption[]>(() => {
   if (store.selectedAssets.length === 0) {
@@ -69,6 +75,32 @@ function openAction(action: ActionOption) {
   }
   selectedAction.value = action;
   dialogOpen.value = true;
+}
+
+function showTooltip(action: ActionOption, event: MouseEvent | FocusEvent) {
+  const target = event.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const leftSide = rect.left - tooltipWidth - tooltipGap;
+  const rightSide = rect.right + tooltipGap;
+  const left =
+    leftSide >= viewportMargin
+      ? leftSide
+      : Math.min(rightSide, window.innerWidth - tooltipWidth - viewportMargin);
+  const top = Math.min(
+    Math.max(viewportMargin, rect.top + rect.height / 2 - 64),
+    window.innerHeight - 176,
+  );
+
+  hoveredAction.value = action;
+  tooltipStyle.value = {
+    left: `${Math.max(viewportMargin, left)}px`,
+    top: `${top}px`,
+    width: `${tooltipWidth}px`,
+  };
+}
+
+function hideTooltip() {
+  hoveredAction.value = null;
 }
 
 async function submitAction(params: Record<string, unknown>) {
@@ -126,7 +158,7 @@ async function submitAction(params: Record<string, unknown>) {
       </p>
     </div>
 
-    <div v-else class="space-y-4 overflow-auto pr-1">
+    <div v-else class="space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
       <section v-for="[group, actions] in groupedActions" :key="group" class="space-y-2">
         <div class="flex items-center justify-between gap-2">
           <h3 class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -136,43 +168,52 @@ async function submitAction(params: Record<string, unknown>) {
         </div>
 
         <div class="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-2">
-          <div v-for="action in actions" :key="action.id" class="group relative">
+          <div v-for="action in actions" :key="action.id">
             <button
               class="flex aspect-square w-full items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               type="button"
               :aria-label="action.title"
               :disabled="isAgentAction(action) || creating"
+              @blur="hideTooltip"
               @click="openAction(action)"
+              @focus="showTooltip(action, $event)"
+              @mouseenter="showTooltip(action, $event)"
+              @mouseleave="hideTooltip"
             >
               <component :is="iconFor(action)" class="h-5 w-5" />
             </button>
-
-            <div
-              class="pointer-events-none absolute right-0 top-[calc(100%+0.5rem)] z-20 hidden w-72 rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg group-focus-within:block group-hover:block"
-            >
-              <div class="mb-2 flex flex-wrap items-center gap-2">
-                <p class="text-sm font-medium">{{ action.title }}</p>
-                <Badge v-if="isAgentAction(action)" variant="warning">Stub</Badge>
-                <Badge v-else variant="secondary">{{ costLabel(action.cost_class) }}</Badge>
-                <Badge v-if="!isAgentAction(action) && hasAssetIdsInput(action)" variant="outline">
-                  Multi
-                </Badge>
-              </div>
-              <p class="text-xs leading-5 text-muted-foreground">
-                {{ action.description }}
-              </p>
-              <p
-                v-if="!isAgentAction(action)"
-                class="mt-2 text-xs text-muted-foreground"
-              >
-                {{ action.supported_media_types.join(", ") }}
-              </p>
-            </div>
           </div>
         </div>
       </section>
     </div>
   </Card>
+
+  <Teleport to="body">
+    <div
+      v-if="hoveredAction"
+      class="pointer-events-none fixed z-[100] rounded-lg border bg-popover p-3 text-popover-foreground shadow-xl"
+      :style="tooltipStyle"
+      role="tooltip"
+    >
+      <div class="mb-2 flex flex-wrap items-center gap-2">
+        <p class="text-sm font-medium">{{ hoveredAction.title }}</p>
+        <Badge v-if="isAgentAction(hoveredAction)" variant="warning">Stub</Badge>
+        <Badge v-else variant="secondary">{{ costLabel(hoveredAction.cost_class) }}</Badge>
+        <Badge
+          v-if="!isAgentAction(hoveredAction) && hasAssetIdsInput(hoveredAction)"
+          variant="outline"
+        >
+          Multi
+        </Badge>
+      </div>
+      <p class="text-xs leading-5 text-muted-foreground">
+        {{ hoveredAction.description }}
+      </p>
+      <p v-if="!isAgentAction(hoveredAction)" class="mt-2 text-xs text-muted-foreground">
+        {{ hoveredAction.supported_media_types.join(", ") }}
+      </p>
+    </div>
+  </Teleport>
 
   <ActionDialog
     :open="dialogOpen"
