@@ -1,0 +1,66 @@
+<script setup lang="ts">
+import { computed } from "vue";
+
+import Badge from "@/components/ui/Badge.vue";
+import Card from "@/components/ui/Card.vue";
+import { useWorkspaceStore } from "@/stores/workspace";
+import type { Job, JobStatus } from "@/types/api";
+
+const store = useWorkspaceStore();
+
+const jobs = computed(() => store.latestJobs.slice(0, 8));
+
+function statusVariant(status: JobStatus) {
+  if (status === "succeeded") {
+    return "success";
+  }
+  if (status === "failed" || status === "cancelled") {
+    return "warning";
+  }
+  return "secondary";
+}
+
+function outputSummary(job: Job) {
+  const outputs = job.output?.outputs;
+  if (Array.isArray(outputs)) {
+    return `${outputs.length} derived asset${outputs.length === 1 ? "" : "s"}`;
+  }
+  if (job.output) {
+    return Object.keys(job.output).slice(0, 3).join(", ");
+  }
+  return job.error ?? "Waiting for output";
+}
+</script>
+
+<template>
+  <Card class="flex min-h-0 flex-col p-4">
+    <div class="mb-3">
+      <h2 class="font-semibold">Jobs</h2>
+      <p class="text-sm text-muted-foreground">Latest project activity</p>
+    </div>
+
+    <div v-if="jobs.length" class="space-y-3 overflow-auto pr-1">
+      <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="truncate text-sm font-medium">{{ job.capability_id }}</h3>
+            <p class="mt-1 text-xs text-muted-foreground">{{ outputSummary(job) }}</p>
+          </div>
+          <Badge :variant="statusVariant(job.status)">
+            {{ job.status }}
+          </Badge>
+        </div>
+        <div class="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+          <div
+            class="h-full rounded-full bg-primary transition-all"
+            :style="{ width: `${job.progress}%` }"
+          />
+        </div>
+      </article>
+    </div>
+
+    <p v-else class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+      Created jobs will appear here with live polling until they finish.
+    </p>
+  </Card>
+</template>

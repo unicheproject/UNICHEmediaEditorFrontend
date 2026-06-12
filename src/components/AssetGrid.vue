@@ -1,0 +1,156 @@
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { Download, FileAudio, FileText, Film, Image, Upload } from "lucide-vue-next";
+
+import Badge from "@/components/ui/Badge.vue";
+import Button from "@/components/ui/Button.vue";
+import Card from "@/components/ui/Card.vue";
+import { assetDownloadUrl } from "@/lib/api";
+import { mediaLabel } from "@/lib/capabilities";
+import { cn } from "@/lib/utils";
+import { useWorkspaceStore } from "@/stores/workspace";
+import type { Asset, MediaType } from "@/types/api";
+
+const store = useWorkspaceStore();
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const sortedAssets = computed(() =>
+  [...store.assets].sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at)),
+);
+
+function iconFor(mediaType: MediaType) {
+  return {
+    image: Image,
+    audio: FileAudio,
+    video: Film,
+    subtitle: FileText,
+  }[mediaType];
+}
+
+function formatSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function isSelected(asset: Asset) {
+  return store.selectedAssetIds.has(asset.id);
+}
+
+async function uploadFiles(event: Event) {
+  const files = Array.from((event.target as HTMLInputElement).files ?? []);
+  for (const file of files) {
+    try {
+      await store.uploadAsset(file);
+    } catch (err) {
+      store.setError(err instanceof Error ? err.message : `Unable to upload ${file.name}`);
+    }
+  }
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+}
+</script>
+
+<template>
+  <section class="flex min-h-0 flex-col gap-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-semibold">Assets</h2>
+        <p class="text-sm text-muted-foreground">
+          {{ store.assets.length }} uploaded or derived assets
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <Button
+          v-if="store.selectedAssetIds.size"
+          variant="outline"
+          size="sm"
+          @click="store.clearSelection"
+        >
+          Clear selection
+        </Button>
+        <input ref="fileInput" class="hidden" type="file" multiple @change="uploadFiles" />
+        <Button :disabled="!store.selectedProjectId || store.uploading" @click="fileInput?.click()">
+          <Upload class="h-4 w-4" />
+          Upload
+        </Button>
+      </div>
+    </div>
+
+    <div
+      v-if="sortedAssets.length"
+      class="grid min-h-0 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3 overflow-auto pr-1"
+    >
+      <Card
+        v-for="asset in sortedAssets"
+        :key="asset.id"
+        :class="
+          cn(
+            'group flex cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
+            isSelected(asset) && 'border-primary ring-2 ring-primary/20',
+          )
+        "
+        @click="store.toggleAsset(asset.id)"
+      >
+        <div class="relative aspect-[4/3] bg-muted">
+          <img
+            v-if="asset.media_type === 'image'"
+            :src="assetDownloadUrl(asset.id)"
+            :alt="asset.original_filename"
+            class="h-full w-full object-cover"
+          />
+          <component
+            :is="iconFor(asset.media_type)"
+            v-else
+            class="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <Badge class="absolute left-2 top-2" variant="secondary">
+            {{ mediaLabel(asset.media_type) }}
+          </Badge>
+          <Badge
+            class="absolute bottom-2 left-2"
+            :variant="asset.source_asset_id ? 'success' : 'outline'"
+          >
+            {{ asset.source_asset_id ? "Derived" : "Original" }}
+          </Badge>
+        </div>
+        <div class="flex min-h-32 flex-1 flex-col p-3">
+          <h3 class="line-clamp-2 text-sm font-medium" :title="asset.original_filename">
+            {{ asset.original_filename }}
+          </h3>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
+          </p>
+          <div class="mt-auto flex items-center justify-between gap-2 pt-3">
+            <span class="truncate text-xs text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
+            <a
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+              :href="assetDownloadUrl(asset.id)"
+              target="_blank"
+              rel="noreferrer"
+              title="Download asset"
+              @click.stop
+            >
+              <Download class="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    <Card v-else class="flex min-h-80 items-center justify-center border-dashed p-8 text-center">
+      <div class="max-w-sm">
+        <Upload class="mx-auto h-10 w-10 text-muted-foreground" />
+        <h3 class="mt-3 font-medium">No assets yet</h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Upload images, audio, video, or subtitle files to make actions available.
+        </p>
+      </div>
+    </Card>
+  </section>
+</template>
