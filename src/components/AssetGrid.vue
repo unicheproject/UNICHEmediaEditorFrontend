@@ -108,7 +108,7 @@ async function uploadFiles(event: Event) {
 </script>
 
 <template>
-  <section class="flex min-h-0 flex-col gap-4">
+  <section class="flex h-full min-h-0 flex-col gap-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-xl font-semibold">Assets</h2>
@@ -135,7 +135,7 @@ async function uploadFiles(event: Event) {
 
     <div
       v-if="sortedAssets.length"
-      class="grid min-h-0 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3 overflow-auto pr-1"
+      class="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] content-start gap-3 overflow-auto pr-1"
     >
       <Card
         v-for="asset in sortedAssets"
@@ -218,7 +218,7 @@ async function uploadFiles(event: Event) {
       </Card>
     </div>
 
-    <Card v-else class="flex min-h-80 items-center justify-center border-dashed p-8 text-center">
+    <Card v-else class="flex min-h-0 flex-1 items-center justify-center border-dashed p-8 text-center">
       <div class="max-w-sm">
         <Upload class="mx-auto h-10 w-10 text-muted-foreground" />
         <h3 class="mt-3 font-medium">No assets yet</h3>
