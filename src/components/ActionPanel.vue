@@ -37,7 +37,11 @@ const availableActions = computed<ActionOption[]>(() => {
     return [];
   }
   const capabilities = store.capabilities
-    .filter((capability) => supportsSelection(capability, store.selectedAssets))
+    .filter(
+      (capability) =>
+        capability.id !== "video.compose" &&
+        supportsSelection(capability, store.selectedAssets),
+    )
     .sort((left, right) => {
       const leftPresentation = presentationFor(left);
       const rightPresentation = presentationFor(right);

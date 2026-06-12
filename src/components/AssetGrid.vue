@@ -50,6 +50,22 @@ function canPlay(asset: Asset) {
   return asset.media_type === "audio" || asset.media_type === "video";
 }
 
+function canUseOnTimeline(asset: Asset) {
+  return asset.media_type === "audio" || asset.media_type === "video";
+}
+
+function dragAsset(asset: Asset, event: DragEvent) {
+  if (!event.dataTransfer || !canUseOnTimeline(asset)) {
+    return;
+  }
+  event.dataTransfer.effectAllowed = "copy";
+  event.dataTransfer.setData(
+    "application/x-uniche-asset",
+    JSON.stringify({ id: asset.id, media_type: asset.media_type }),
+  );
+  event.dataTransfer.setData("text/plain", asset.id);
+}
+
 function openPlayer(asset: Asset) {
   playerAsset.value = asset;
 }
@@ -130,7 +146,9 @@ async function uploadFiles(event: Event) {
             isSelected(asset) && 'border-primary ring-2 ring-primary/20',
           )
         "
+        :draggable="canUseOnTimeline(asset)"
         @click="store.toggleAsset(asset.id)"
+        @dragstart="dragAsset(asset, $event)"
       >
         <div class="relative aspect-[4/3] bg-muted">
           <img

@@ -6,6 +6,7 @@ import ActionPanel from "@/components/ActionPanel.vue";
 import AssetGrid from "@/components/AssetGrid.vue";
 import JobsPanel from "@/components/JobsPanel.vue";
 import ProjectSelection from "@/components/ProjectSelection.vue";
+import TimelineComposer from "@/components/TimelineComposer.vue";
 import WorkspaceHeader from "@/components/WorkspaceHeader.vue";
 import Button from "@/components/ui/Button.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
@@ -108,15 +109,19 @@ function handlePopState() {
     <div v-else class="grid min-h-screen grid-rows-[auto_minmax(0,1fr)]">
       <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
 
-      <main class="grid min-h-0 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div class="min-h-0">
-          <AssetGrid />
-        </div>
+      <main class="grid min-h-0 grid-rows-[minmax(0,1fr)_340px] gap-4 p-4">
+        <section class="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div class="min-h-0">
+            <AssetGrid />
+          </div>
 
-        <aside class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(260px,0.8fr)]">
-          <ActionPanel />
-          <JobsPanel />
-        </aside>
+          <aside class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(220px,0.7fr)]">
+            <ActionPanel />
+            <JobsPanel />
+          </aside>
+        </section>
+
+        <TimelineComposer />
       </main>
     </div>
   </div>
