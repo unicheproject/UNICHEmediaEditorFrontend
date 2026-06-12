@@ -110,7 +110,7 @@ function handlePopState() {
       <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
 
       <main class="grid min-h-0 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_340px]">
+        <section class="grid min-h-0 gap-4 lg:grid-rows-2">
           <div class="min-h-0 overflow-hidden">
             <AssetGrid />
           </div>
