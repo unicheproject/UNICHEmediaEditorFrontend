@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Edit, Home, RefreshCw } from "lucide-vue-next";
+import { Edit, Home, RefreshCw, Trash2 } from "lucide-vue-next";
 import { ref, watch } from "vue";
 
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
@@ -9,8 +10,9 @@ import Input from "@/components/ui/Input.vue";
 import Textarea from "@/components/ui/Textarea.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
 
-defineEmits<{
+const emit = defineEmits<{
   home: [];
+  projectDeleted: [];
 }>();
 
 const store = useWorkspaceStore();
@@ -18,6 +20,8 @@ const editOpen = ref(false);
 const name = ref("");
 const description = ref("");
 const saving = ref(false);
+const confirmDeleteOpen = ref(false);
+const deleting = ref(false);
 
 watch(
   () => store.selectedProject,
@@ -55,6 +59,23 @@ async function submitEdit() {
     store.setError(err instanceof Error ? err.message : "Unable to update project");
   } finally {
     saving.value = false;
+  }
+}
+
+async function confirmDeleteProject() {
+  if (!store.selectedProject) {
+    return;
+  }
+
+  deleting.value = true;
+  try {
+    await store.deleteProject(store.selectedProject.id);
+    confirmDeleteOpen.value = false;
+    emit("projectDeleted");
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to delete project");
+  } finally {
+    deleting.value = false;
   }
 }
 </script>
@@ -97,6 +118,14 @@ async function submitEdit() {
           <Edit class="h-4 w-4" />
           Edit project
         </Button>
+        <Button
+          variant="destructive"
+          :disabled="!store.selectedProject"
+          @click="confirmDeleteOpen = true"
+        >
+          <Trash2 class="h-4 w-4" />
+          Delete
+        </Button>
       </div>
     </div>
   </header>
@@ -117,4 +146,14 @@ async function submitEdit() {
       </div>
     </form>
   </Dialog>
+
+  <ConfirmDialog
+    :open="confirmDeleteOpen"
+    title="Delete project"
+    :description="`Delete '${store.selectedProject?.name ?? 'this project'}'? Its assets and jobs will no longer be available from this workspace.`"
+    :loading="deleting"
+    confirm-label="Delete project"
+    @close="confirmDeleteOpen = false"
+    @confirm="confirmDeleteProject"
+  />
 </template>

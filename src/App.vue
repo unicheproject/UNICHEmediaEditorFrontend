@@ -106,7 +106,7 @@ function handlePopState() {
     <ProjectSelection v-if="showingProjects" @open-project="openProject" />
 
     <div v-else class="grid min-h-screen grid-rows-[auto_minmax(0,1fr)]">
-      <WorkspaceHeader @home="goHome" />
+      <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
 
       <main class="grid min-h-0 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div class="min-h-0">

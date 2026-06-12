@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Download, FileAudio, FileText, Film, Image, Play, Upload } from "lucide-vue-next";
+import { Download, FileAudio, FileText, Film, Image, Play, Trash2, Upload } from "lucide-vue-next";
 
 import AssetPlayerDialog from "@/components/AssetPlayerDialog.vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
@@ -15,6 +16,8 @@ import type { Asset, MediaType } from "@/types/api";
 const store = useWorkspaceStore();
 const fileInput = ref<HTMLInputElement | null>(null);
 const playerAsset = ref<Asset | null>(null);
+const assetToDelete = ref<Asset | null>(null);
+const deleting = ref(false);
 
 const sortedAssets = computed(() =>
   [...store.assets].sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at)),
@@ -53,6 +56,24 @@ function openPlayer(asset: Asset) {
 
 function closePlayer() {
   playerAsset.value = null;
+}
+
+async function confirmDeleteAsset() {
+  if (!assetToDelete.value) {
+    return;
+  }
+  deleting.value = true;
+  try {
+    await store.deleteAsset(assetToDelete.value.id);
+    if (playerAsset.value?.id === assetToDelete.value.id) {
+      closePlayer();
+    }
+    assetToDelete.value = null;
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to delete asset");
+  } finally {
+    deleting.value = false;
+  }
 }
 
 async function uploadFiles(event: Event) {
@@ -153,16 +174,27 @@ async function uploadFiles(event: Event) {
           </p>
           <div class="mt-auto flex items-center justify-between gap-2 pt-3">
             <span class="truncate text-xs text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
-            <a
-              class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-              :href="assetDownloadUrl(asset.id)"
-              target="_blank"
-              rel="noreferrer"
-              title="Download asset"
-              @click.stop
-            >
-              <Download class="h-4 w-4" />
-            </a>
+            <div class="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Delete asset"
+                @click.stop="assetToDelete = asset"
+              >
+                <Trash2 class="h-4 w-4 text-destructive" />
+                <span class="sr-only">Delete asset</span>
+              </Button>
+              <a
+                class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
+                :href="assetDownloadUrl(asset.id)"
+                target="_blank"
+                rel="noreferrer"
+                title="Download asset"
+                @click.stop
+              >
+                <Download class="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
       </Card>
@@ -179,5 +211,14 @@ async function uploadFiles(event: Event) {
     </Card>
 
     <AssetPlayerDialog :open="!!playerAsset" :asset="playerAsset" @close="closePlayer" />
+    <ConfirmDialog
+      :open="!!assetToDelete"
+      title="Delete asset"
+      :description="`Delete '${assetToDelete?.original_filename ?? 'this asset'}'? This removes it from the project asset list.`"
+      :loading="deleting"
+      confirm-label="Delete asset"
+      @close="assetToDelete = null"
+      @confirm="confirmDeleteAsset"
+    />
   </section>
 </template>

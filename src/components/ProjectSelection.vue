@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Edit, FolderOpen, FolderPlus, RefreshCw } from "lucide-vue-next";
+import { Edit, FolderOpen, FolderPlus, RefreshCw, Trash2 } from "lucide-vue-next";
 import { ref } from "vue";
 
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
 import Dialog from "@/components/ui/Dialog.vue";
@@ -17,9 +18,11 @@ const emit = defineEmits<{
 const store = useWorkspaceStore();
 const createOpen = ref(false);
 const editingProject = ref<Project | null>(null);
+const projectToDelete = ref<Project | null>(null);
 const name = ref("");
 const description = ref("");
 const saving = ref(false);
+const deleting = ref(false);
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -82,6 +85,22 @@ function closeDialog() {
   createOpen.value = false;
   editingProject.value = null;
 }
+
+async function confirmDeleteProject() {
+  if (!projectToDelete.value) {
+    return;
+  }
+
+  deleting.value = true;
+  try {
+    await store.deleteProject(projectToDelete.value.id);
+    projectToDelete.value = null;
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to delete project");
+  } finally {
+    deleting.value = false;
+  }
+}
 </script>
 
 <template>
@@ -132,6 +151,14 @@ function closeDialog() {
               >
                 <Edit class="h-4 w-4" />
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Delete project"
+                @click.stop="projectToDelete = project"
+              >
+                <Trash2 class="h-4 w-4 text-destructive" />
+              </Button>
               <FolderOpen class="h-5 w-5 text-primary" />
             </div>
           </div>
@@ -178,5 +205,15 @@ function closeDialog() {
         </div>
       </form>
     </Dialog>
+
+    <ConfirmDialog
+      :open="!!projectToDelete"
+      title="Delete project"
+      :description="`Delete '${projectToDelete?.name ?? 'this project'}'? Its assets and jobs will no longer be available from this workspace.`"
+      :loading="deleting"
+      confirm-label="Delete project"
+      @close="projectToDelete = null"
+      @confirm="confirmDeleteProject"
+    />
   </section>
 </template>

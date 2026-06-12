@@ -102,6 +102,17 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     return project;
   }
 
+  async function deleteProject(projectId: string) {
+    await api.deleteProject(projectId);
+    projects.value = projects.value.filter((project) => project.id !== projectId);
+    if (selectedProjectId.value === projectId) {
+      selectedProjectId.value = null;
+      assets.value = [];
+      jobs.value = [];
+      selectedAssetIds.value = new Set();
+    }
+  }
+
   async function uploadAsset(file: File) {
     if (!selectedProjectId.value) {
       throw new Error("Select a project before uploading assets.");
@@ -113,6 +124,14 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     } finally {
       uploading.value = false;
     }
+  }
+
+  async function deleteAsset(assetId: string) {
+    await api.deleteAsset(assetId);
+    assets.value = assets.value.filter((asset) => asset.id !== assetId);
+    const selected = new Set(selectedAssetIds.value);
+    selected.delete(assetId);
+    selectedAssetIds.value = selected;
   }
 
   function toggleAsset(assetId: string) {
@@ -203,7 +222,9 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     selectProject,
     createProject,
     updateProject,
+    deleteProject,
     uploadAsset,
+    deleteAsset,
     toggleAsset,
     clearSelection,
     createJob,

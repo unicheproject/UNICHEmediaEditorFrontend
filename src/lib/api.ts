@@ -53,6 +53,8 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
+  deleteProject: (projectId: string) =>
+    request<void>(`/projects/${projectId}`, { method: "DELETE" }),
   listAssets: (projectId: string) => request<Asset[]>(`/projects/${projectId}/assets`),
   uploadAsset: (projectId: string, file: File) => {
     const form = new FormData();
@@ -62,6 +64,7 @@ export const api = {
       body: form,
     });
   },
+  deleteAsset: (assetId: string) => request<void>(`/assets/${assetId}`, { method: "DELETE" }),
   listCapabilities: () => request<Capability[]>("/capabilities"),
   createJob: (payload: {
     capability_id: string;
