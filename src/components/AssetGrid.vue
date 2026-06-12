@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Download, FileAudio, FileText, Film, Image, Upload } from "lucide-vue-next";
+import { Download, FileAudio, FileText, Film, Image, Play, Upload } from "lucide-vue-next";
 
+import AssetPlayerDialog from "@/components/AssetPlayerDialog.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
@@ -13,6 +14,7 @@ import type { Asset, MediaType } from "@/types/api";
 
 const store = useWorkspaceStore();
 const fileInput = ref<HTMLInputElement | null>(null);
+const playerAsset = ref<Asset | null>(null);
 
 const sortedAssets = computed(() =>
   [...store.assets].sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at)),
@@ -39,6 +41,18 @@ function formatSize(bytes: number) {
 
 function isSelected(asset: Asset) {
   return store.selectedAssetIds.has(asset.id);
+}
+
+function canPlay(asset: Asset) {
+  return asset.media_type === "audio" || asset.media_type === "video";
+}
+
+function openPlayer(asset: Asset) {
+  playerAsset.value = asset;
+}
+
+function closePlayer() {
+  playerAsset.value = null;
 }
 
 async function uploadFiles(event: Event) {
@@ -118,6 +132,17 @@ async function uploadFiles(event: Event) {
           >
             {{ asset.source_asset_id ? "Derived" : "Original" }}
           </Badge>
+          <Button
+            v-if="canPlay(asset)"
+            class="absolute bottom-2 right-2 bg-background/90 shadow-sm backdrop-blur hover:bg-primary hover:text-primary-foreground"
+            variant="outline"
+            size="icon"
+            title="Play asset"
+            @click.stop="openPlayer(asset)"
+          >
+            <Play class="h-4 w-4" />
+            <span class="sr-only">Play asset</span>
+          </Button>
         </div>
         <div class="flex min-h-32 flex-1 flex-col p-3">
           <h3 class="line-clamp-2 text-sm font-medium" :title="asset.original_filename">
@@ -152,5 +177,7 @@ async function uploadFiles(event: Event) {
         </p>
       </div>
     </Card>
+
+    <AssetPlayerDialog :open="!!playerAsset" :asset="playerAsset" @close="closePlayer" />
   </section>
 </template>
