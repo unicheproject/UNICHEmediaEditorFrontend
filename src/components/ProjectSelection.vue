@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FolderOpen, FolderPlus, RefreshCw } from "lucide-vue-next";
+import { Edit, FolderOpen, FolderPlus, RefreshCw } from "lucide-vue-next";
 import { ref } from "vue";
 
 import Button from "@/components/ui/Button.vue";
@@ -8,6 +8,7 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Textarea from "@/components/ui/Textarea.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
+import type { Project } from "@/types/api";
 
 const emit = defineEmits<{
   openProject: [projectId: string];
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 
 const store = useWorkspaceStore();
 const createOpen = ref(false);
+const editingProject = ref<Project | null>(null);
 const name = ref("");
 const description = ref("");
 const saving = ref(false);
@@ -34,22 +36,51 @@ async function submitProject() {
 
   saving.value = true;
   try {
-    await store.createProject({
-      name: name.value.trim(),
-      description: description.value.trim() || null,
-    });
-    const projectId = store.selectedProjectId;
+    const wasEditing = editingProject.value !== null;
+    if (editingProject.value) {
+      await store.updateProject(editingProject.value.id, {
+        name: name.value.trim(),
+        description: description.value.trim() || null,
+      });
+    } else {
+      await store.createProject({
+        name: name.value.trim(),
+        description: description.value.trim() || null,
+      });
+    }
+
+    const projectId = editingProject.value ? editingProject.value.id : store.selectedProjectId;
+    editingProject.value = null;
     name.value = "";
     description.value = "";
     createOpen.value = false;
-    if (projectId) {
+    if (projectId && !wasEditing) {
       emit("openProject", projectId);
     }
   } catch (err) {
-    store.setError(err instanceof Error ? err.message : "Unable to create project");
+    store.setError(err instanceof Error ? err.message : "Unable to save project");
   } finally {
     saving.value = false;
   }
+}
+
+function openCreate() {
+  editingProject.value = null;
+  name.value = "";
+  description.value = "";
+  createOpen.value = true;
+}
+
+function openEdit(project: Project) {
+  editingProject.value = project;
+  name.value = project.name;
+  description.value = project.description ?? "";
+  createOpen.value = true;
+}
+
+function closeDialog() {
+  createOpen.value = false;
+  editingProject.value = null;
 }
 </script>
 
@@ -66,7 +97,7 @@ async function submitProject() {
             <RefreshCw class="h-4 w-4" />
             Refresh
           </Button>
-          <Button @click="createOpen = true">
+          <Button @click="openCreate">
             <FolderPlus class="h-4 w-4" />
             New project
           </Button>
@@ -92,7 +123,17 @@ async function submitProject() {
                 {{ project.description || "No description" }}
               </p>
             </div>
-            <FolderOpen class="h-5 w-5 shrink-0 text-primary" />
+            <div class="flex shrink-0 items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Edit project"
+                @click.stop="openEdit(project)"
+              >
+                <Edit class="h-4 w-4" />
+              </Button>
+              <FolderOpen class="h-5 w-5 text-primary" />
+            </div>
           </div>
           <div class="mt-auto border-t pt-4 text-xs text-muted-foreground">
             Updated {{ formatDate(project.updated_at) }}
@@ -107,7 +148,7 @@ async function submitProject() {
           <p class="mt-1 text-sm text-muted-foreground">
             Create a project before uploading and processing media assets.
           </p>
-          <Button class="mt-4" @click="createOpen = true">
+          <Button class="mt-4" @click="openCreate">
             <FolderPlus class="h-4 w-4" />
             New project
           </Button>
@@ -115,7 +156,11 @@ async function submitProject() {
       </Card>
     </main>
 
-    <Dialog :open="createOpen" title="Create project" @close="createOpen = false">
+    <Dialog
+      :open="createOpen"
+      :title="editingProject ? 'Edit project' : 'Create project'"
+      @close="closeDialog"
+    >
       <form class="space-y-4" @submit.prevent="submitProject">
         <label class="block space-y-2">
           <span class="field-label">Name</span>
@@ -126,8 +171,10 @@ async function submitProject() {
           <Textarea v-model="description" placeholder="Optional project context" />
         </label>
         <div class="flex justify-end gap-2">
-          <Button variant="outline" @click="createOpen = false">Cancel</Button>
-          <Button type="submit" :disabled="saving || !name.trim()">Create</Button>
+          <Button variant="outline" @click="closeDialog">Cancel</Button>
+          <Button type="submit" :disabled="saving || !name.trim()">
+            {{ editingProject ? "Save" : "Create" }}
+          </Button>
         </div>
       </form>
     </Dialog>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AlertCircle } from "lucide-vue-next";
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
 import ActionPanel from "@/components/ActionPanel.vue";
 import AssetGrid from "@/components/AssetGrid.vue";
@@ -13,18 +13,80 @@ import { useWorkspaceStore } from "@/stores/workspace";
 const store = useWorkspaceStore();
 const showingProjects = ref(true);
 
-onMounted(() => {
-  void store.loadInitial();
+onMounted(async () => {
+  await store.loadInitial();
+  await openProjectFromUrl();
+  window.addEventListener("popstate", handlePopState);
 });
 
-async function openProject(projectId: string) {
-  await store.selectProject(projectId);
-  showingProjects.value = false;
+onBeforeUnmount(() => {
+  window.removeEventListener("popstate", handlePopState);
+});
+
+function projectIdFromUrl() {
+  return new URLSearchParams(window.location.search).get("project");
 }
 
-function goHome() {
+function writeProjectUrl(projectId: string | null, replace = false) {
+  const url = new URL(window.location.href);
+  if (projectId) {
+    url.searchParams.set("project", projectId);
+  } else {
+    url.searchParams.delete("project");
+  }
+
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  if (replace) {
+    window.history.replaceState({}, "", next);
+  } else {
+    window.history.pushState({}, "", next);
+  }
+}
+
+async function openProject(projectId: string, updateUrl = true) {
+  try {
+    await store.selectProject(projectId);
+    showingProjects.value = false;
+    if (updateUrl) {
+      writeProjectUrl(projectId);
+    }
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to open project");
+    goHome(true);
+  }
+}
+
+async function openProjectFromUrl() {
+  const projectId = projectIdFromUrl();
+  if (!projectId) {
+    showingProjects.value = true;
+    return;
+  }
+
+  if (!store.projects.some((project) => project.id === projectId)) {
+    store.setError("The linked project could not be found.");
+    goHome(true, true);
+    return;
+  }
+
+  await openProject(projectId, false);
+}
+
+function goHome(updateUrl = true, replace = false) {
   store.clearSelection();
   showingProjects.value = true;
+  if (updateUrl) {
+    writeProjectUrl(null, replace);
+  }
+}
+
+function handlePopState() {
+  const projectId = projectIdFromUrl();
+  if (projectId) {
+    void openProject(projectId, false);
+  } else {
+    goHome(false);
+  }
 }
 </script>
 

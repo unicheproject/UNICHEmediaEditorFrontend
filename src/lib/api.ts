@@ -45,6 +45,14 @@ export const api = {
   listProjects: () => request<Project[]>("/projects"),
   createProject: (payload: { name: string; description?: string | null }) =>
     request<Project>("/projects", { method: "POST", body: JSON.stringify(payload) }),
+  updateProject: (
+    projectId: string,
+    payload: { name?: string; description?: string | null },
+  ) =>
+    request<Project>(`/projects/${projectId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   listAssets: (projectId: string) => request<Asset[]>(`/projects/${projectId}/assets`),
   uploadAsset: (projectId: string, file: File) => {
     const form = new FormData();

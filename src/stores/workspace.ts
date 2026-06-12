@@ -88,6 +88,20 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     await selectProject(project.id);
   }
 
+  async function updateProject(
+    projectId: string,
+    payload: { name?: string; description?: string | null },
+  ) {
+    const project = await api.updateProject(projectId, payload);
+    const index = projects.value.findIndex((candidate) => candidate.id === projectId);
+    if (index >= 0) {
+      projects.value.splice(index, 1, project);
+    } else {
+      projects.value.unshift(project);
+    }
+    return project;
+  }
+
   async function uploadAsset(file: File) {
     if (!selectedProjectId.value) {
       throw new Error("Select a project before uploading assets.");
@@ -188,6 +202,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     loadProjectData,
     selectProject,
     createProject,
+    updateProject,
     uploadAsset,
     toggleAsset,
     clearSelection,

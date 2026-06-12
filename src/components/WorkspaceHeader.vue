@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { Home, RefreshCw } from "lucide-vue-next";
+import { Edit, Home, RefreshCw } from "lucide-vue-next";
+import { ref, watch } from "vue";
 
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
+import Dialog from "@/components/ui/Dialog.vue";
+import Input from "@/components/ui/Input.vue";
+import Textarea from "@/components/ui/Textarea.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
 
 defineEmits<{
@@ -10,6 +14,49 @@ defineEmits<{
 }>();
 
 const store = useWorkspaceStore();
+const editOpen = ref(false);
+const name = ref("");
+const description = ref("");
+const saving = ref(false);
+
+watch(
+  () => store.selectedProject,
+  (project) => {
+    if (!editOpen.value && project) {
+      name.value = project.name;
+      description.value = project.description ?? "";
+    }
+  },
+  { immediate: true },
+);
+
+function openEdit() {
+  if (!store.selectedProject) {
+    return;
+  }
+  name.value = store.selectedProject.name;
+  description.value = store.selectedProject.description ?? "";
+  editOpen.value = true;
+}
+
+async function submitEdit() {
+  if (!store.selectedProject || !name.value.trim()) {
+    return;
+  }
+
+  saving.value = true;
+  try {
+    await store.updateProject(store.selectedProject.id, {
+      name: name.value.trim(),
+      description: description.value.trim() || null,
+    });
+    editOpen.value = false;
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to update project");
+  } finally {
+    saving.value = false;
+  }
+}
 </script>
 
 <template>
@@ -46,7 +93,28 @@ const store = useWorkspaceStore();
           <RefreshCw class="h-4 w-4" />
           Refresh
         </Button>
+        <Button :disabled="!store.selectedProject" @click="openEdit">
+          <Edit class="h-4 w-4" />
+          Edit project
+        </Button>
       </div>
     </div>
   </header>
+
+  <Dialog :open="editOpen" title="Edit project" @close="editOpen = false">
+    <form class="space-y-4" @submit.prevent="submitEdit">
+      <label class="block space-y-2">
+        <span class="field-label">Name</span>
+        <Input v-model="name" required placeholder="Project name" />
+      </label>
+      <label class="block space-y-2">
+        <span class="field-label">Description</span>
+        <Textarea v-model="description" placeholder="Optional project context" />
+      </label>
+      <div class="flex justify-end gap-2">
+        <Button variant="outline" @click="editOpen = false">Cancel</Button>
+        <Button type="submit" :disabled="saving || !name.trim()">Save</Button>
+      </div>
+    </form>
+  </Dialog>
 </template>
