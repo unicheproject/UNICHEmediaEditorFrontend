@@ -17,7 +17,7 @@ export function isAgentAction(action: ActionOption): action is AgentAction {
 export const agentAction: AgentAction = {
   id: "agent",
   title: "Agent",
-  description: "Planned workflow assistant entry point.",
+  description: "Describe a workflow in natural language; the agent proposes a plan you approve.",
   disabled: true,
   stub: true,
 };

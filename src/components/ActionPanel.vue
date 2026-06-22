@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 
 import ActionDialog from "@/components/ActionDialog.vue";
+import AgentChatPanel from "@/components/AgentChatPanel.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Card from "@/components/ui/Card.vue";
 import {
@@ -18,10 +19,12 @@ import {
   supportsSelection,
   type ActionOption,
 } from "@/lib/capabilities";
+import { useAgentChatStore } from "@/stores/agentChat";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Capability } from "@/types/api";
 
 const store = useWorkspaceStore();
+const agentChat = useAgentChatStore();
 const dialogOpen = ref(false);
 const selectedAction = ref<Capability | null>(null);
 const creating = ref(false);
@@ -75,6 +78,7 @@ function iconFor(action: ActionOption) {
 
 function openAction(action: ActionOption) {
   if (isAgentAction(action)) {
+    void agentChat.openChat();
     return;
   }
   selectedAction.value = action;
@@ -177,7 +181,7 @@ async function submitAction(params: Record<string, unknown>) {
               class="flex aspect-square w-full items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               type="button"
               :aria-label="action.title"
-              :disabled="isAgentAction(action) || creating"
+              :disabled="!isAgentAction(action) && creating"
               @blur="hideTooltip"
               @click="openAction(action)"
               @focus="showTooltip(action, $event)"
@@ -201,7 +205,7 @@ async function submitAction(params: Record<string, unknown>) {
     >
       <div class="mb-2 flex flex-wrap items-center gap-2">
         <p class="text-sm font-medium">{{ hoveredAction.title }}</p>
-        <Badge v-if="isAgentAction(hoveredAction)" variant="warning">Stub</Badge>
+        <Badge v-if="isAgentAction(hoveredAction)" variant="secondary">Chat</Badge>
         <Badge v-else variant="secondary">{{ costLabel(hoveredAction.cost_class) }}</Badge>
         <Badge
           v-if="!isAgentAction(hoveredAction) && hasAssetIdsInput(hoveredAction)"
@@ -225,4 +229,6 @@ async function submitAction(params: Record<string, unknown>) {
     @close="dialogOpen = false"
     @submit="submitAction"
   />
+
+  <AgentChatPanel />
 </template>

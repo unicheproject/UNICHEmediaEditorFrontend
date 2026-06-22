@@ -81,3 +81,54 @@ export interface Page<T> {
   limit: number;
   offset: number;
 }
+
+export type AgentPlanStatus = "proposed" | "approved" | "running" | "succeeded" | "failed";
+
+export interface PlanStep {
+  id: string;
+  capability_id: string;
+  params: Record<string, unknown>;
+  asset: string | null;
+  assets: string[];
+  depends_on: string[];
+}
+
+export interface StepRun {
+  step_id?: string;
+  job_id?: string | null;
+  status?: string;
+  output_asset_id?: string | null;
+  error?: string | null;
+  [key: string]: unknown;
+}
+
+export interface AgentPlan {
+  id: string;
+  session_id: string;
+  summary: string;
+  status: AgentPlanStatus;
+  steps: PlanStep[];
+  step_runs: StepRun[];
+  result_asset_ids: string[];
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TranscriptMessage {
+  role: string;
+  content: string | null;
+}
+
+export interface AgentSession {
+  id: string;
+  project_id: string;
+  asset_ids: string[];
+  transcript: TranscriptMessage[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type AgentMessageResponse =
+  | { type: "clarification"; question: string | null; missing: string[]; plan?: null }
+  | { type: "plan"; plan: AgentPlan; question?: null; missing?: string[] };

@@ -1,4 +1,13 @@
-import type { Asset, Capability, Job, Page, Project } from "@/types/api";
+import type {
+  AgentMessageResponse,
+  AgentPlan,
+  AgentSession,
+  Asset,
+  Capability,
+  Job,
+  Page,
+  Project,
+} from "@/types/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 const API_PREFIX = "/api/v1";
@@ -75,4 +84,17 @@ export const api = {
   getJob: (jobId: string) => request<Job>(`/jobs/${jobId}`),
   listProjectJobs: (projectId: string) =>
     request<Page<Job>>(`/projects/${projectId}/jobs?limit=20&offset=0`),
+  createAgentSession: (payload: { project_id: string; asset_ids: string[] }) =>
+    request<AgentSession>("/agent/sessions", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  sendAgentMessage: (sessionId: string, content: string) =>
+    request<AgentMessageResponse>(`/agent/sessions/${sessionId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+  approveAgentPlan: (planId: string) =>
+    request<AgentPlan>(`/agent/plans/${planId}/approve`, { method: "POST" }),
+  getAgentPlan: (planId: string) => request<AgentPlan>(`/agent/plans/${planId}`),
 };
