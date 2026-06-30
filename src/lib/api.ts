@@ -1,3 +1,5 @@
+import { config } from "@/config";
+import { getToken, login } from "@/platform/auth";
 import type {
   AgentMessageResponse,
   AgentPlan,
@@ -9,11 +11,8 @@ import type {
   Project,
 } from "@/types/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+const API_BASE_URL = config.mediaEditorApiUrl;
 const API_PREFIX = "/api/v1";
-
-export const assetDownloadUrl = (assetId: string) =>
-  `${API_BASE_URL}${API_PREFIX}/assets/${assetId}/download`;
 
 interface ApiErrorPayload {
   error?: {
@@ -23,14 +22,26 @@ interface ApiErrorPayload {
   detail?: unknown;
 }
 
+/** Attach the bearer token; bounce to the IdP on 401 (expired/invalid token). */
+async function authedFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  const token = await getToken();
+  const headers = new Headers(options.headers);
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  if (!(options.body instanceof FormData) && options.body !== undefined) {
+    headers.set("Content-Type", "application/json");
+  }
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, { ...options, headers });
+  if (response.status === 401) {
+    login(window.location.pathname + window.location.search);
+    throw new Error("Not authenticated");
+  }
+  return response;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${API_PREFIX}${path}`, {
-    ...options,
-    headers: {
-      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...options.headers,
-    },
-  });
+  const response = await authedFetch(path, options);
 
   if (!response.ok) {
     let message = `Request failed with ${response.status}`;
@@ -50,10 +61,39 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return (await response.json()) as T;
 }
 
+/** Fetch asset bytes with auth and return an object URL. Caller must revoke it. */
+export async function fetchAssetObjectUrl(assetId: string): Promise<string> {
+  const response = await authedFetch(`/assets/${assetId}/download`);
+  if (!response.ok) {
+    throw new Error(`Failed to load asset (${response.status})`);
+  }
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}
+
+/** Download asset bytes with auth and save them with the original filename. */
+export async function downloadAsset(asset: Asset): Promise<void> {
+  const url = await fetchAssetObjectUrl(asset.id);
+  try {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = asset.original_filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export const api = {
   listProjects: () => request<Project[]>("/projects"),
-  createProject: (payload: { name: string; description?: string | null }) =>
-    request<Project>("/projects", { method: "POST", body: JSON.stringify(payload) }),
+  createProject: (payload: {
+    name: string;
+    slug: string;
+    org_id: string;
+    description?: string | null;
+  }) => request<Project>("/projects", { method: "POST", body: JSON.stringify(payload) }),
   updateProject: (
     projectId: string,
     payload: { name?: string; description?: string | null },

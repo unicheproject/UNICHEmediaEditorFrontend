@@ -82,7 +82,12 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     await loadProjectData(projectId);
   }
 
-  async function createProject(payload: { name: string; description?: string | null }) {
+  async function createProject(payload: {
+    name: string;
+    slug: string;
+    org_id: string;
+    description?: string | null;
+  }) {
     const project = await api.createProject(payload);
     projects.value = [project, ...projects.value];
     await selectProject(project.id);

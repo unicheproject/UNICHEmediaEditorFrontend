@@ -3,11 +3,12 @@ import { computed, ref } from "vue";
 import { Download, FileAudio, FileText, Film, Image, Play, Trash2, Upload } from "lucide-vue-next";
 
 import AssetPlayerDialog from "@/components/AssetPlayerDialog.vue";
+import AuthedMedia from "@/components/AuthedMedia.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
-import { assetDownloadUrl } from "@/lib/api";
+import { downloadAsset } from "@/lib/api";
 import { mediaLabel } from "@/lib/capabilities";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace";
@@ -151,9 +152,10 @@ async function uploadFiles(event: Event) {
         @dragstart="dragAsset(asset, $event)"
       >
         <div class="relative aspect-[4/3] bg-muted">
-          <img
+          <AuthedMedia
             v-if="asset.media_type === 'image'"
-            :src="assetDownloadUrl(asset.id)"
+            :asset-id="asset.id"
+            kind="img"
             :alt="asset.original_filename"
             class="h-full w-full object-cover"
           />
@@ -202,16 +204,15 @@ async function uploadFiles(event: Event) {
                 <Trash2 class="h-4 w-4 text-destructive" />
                 <span class="sr-only">Delete asset</span>
               </Button>
-              <a
-                class="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
-                :href="assetDownloadUrl(asset.id)"
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                variant="ghost"
+                size="icon"
                 title="Download asset"
-                @click.stop
+                @click.stop="downloadAsset(asset)"
               >
                 <Download class="h-4 w-4" />
-              </a>
+                <span class="sr-only">Download asset</span>
+              </Button>
             </div>
           </div>
         </div>

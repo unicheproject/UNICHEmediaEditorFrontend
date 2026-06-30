@@ -4,7 +4,7 @@ import { Plus, Trash2 } from "lucide-vue-next";
 
 import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
-import { assetDownloadUrl } from "@/lib/api";
+import { useAssetObjectUrl } from "@/composables/useAssetObjectUrl";
 import type { Asset, Capability } from "@/types/api";
 
 const props = defineProps<{
@@ -12,6 +12,8 @@ const props = defineProps<{
   asset: Asset;
   open: boolean;
 }>();
+
+const { url: videoUrl } = useAssetObjectUrl(() => props.asset.id);
 
 const emit = defineEmits<{
   close: [];
@@ -144,7 +146,7 @@ function submit() {
       <video
         ref="video"
         class="max-h-[52vh] w-full rounded-md bg-black"
-        :src="assetDownloadUrl(asset.id)"
+        :src="videoUrl"
         controls
         @loadedmetadata="onLoadedMetadata"
         @timeupdate="onTimeUpdate"

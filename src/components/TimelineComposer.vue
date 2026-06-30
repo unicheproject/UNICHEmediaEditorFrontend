@@ -5,7 +5,7 @@ import { Download, Film, Music, Trash2 } from "lucide-vue-next";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
-import { assetDownloadUrl } from "@/lib/api";
+import { fetchAssetObjectUrl } from "@/lib/api";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Asset } from "@/types/api";
 
@@ -62,8 +62,14 @@ function barWidth(asset: Asset) {
   return `${Math.max(88, durationFor(asset) * pixelsPerSecond)}px`;
 }
 
-function loadDuration(asset: Asset) {
+async function loadDuration(asset: Asset) {
   if (durations[asset.id] || !["audio", "video"].includes(asset.media_type)) {
+    return;
+  }
+  let objectUrl: string;
+  try {
+    objectUrl = await fetchAssetObjectUrl(asset.id);
+  } catch {
     return;
   }
   const element =
@@ -71,12 +77,15 @@ function loadDuration(asset: Asset) {
       ? document.createElement("video")
       : document.createElement("audio");
   element.preload = "metadata";
-  element.src = assetDownloadUrl(asset.id);
+  element.src = objectUrl;
+  const cleanup = () => URL.revokeObjectURL(objectUrl);
   element.onloadedmetadata = () => {
     if (Number.isFinite(element.duration) && element.duration > 0) {
       durations[asset.id] = element.duration;
     }
+    cleanup();
   };
+  element.onerror = cleanup;
 }
 
 function parseDraggedAsset(event: DragEvent) {

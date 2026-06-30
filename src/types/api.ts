@@ -6,11 +6,19 @@ export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "cancell
 
 export interface Project {
   id: string;
+  org_id?: string | null;
   name: string;
+  slug?: string | null;
+  status?: string | null;
   description: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  deleted_at?: string | null;
+}
+
+export interface Organisation {
+  id: string;
+  name: string;
 }
 
 export interface Asset {

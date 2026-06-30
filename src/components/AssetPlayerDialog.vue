@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import AuthedMedia from "@/components/AuthedMedia.vue";
 import Dialog from "@/components/ui/Dialog.vue";
-import { assetDownloadUrl } from "@/lib/api";
 import type { Asset } from "@/types/api";
 
 defineProps<{
@@ -22,16 +22,17 @@ defineEmits<{
     @close="$emit('close')"
   >
     <div v-if="asset" class="space-y-4">
-      <video
+      <AuthedMedia
         v-if="asset.media_type === 'video'"
+        :asset-id="asset.id"
+        kind="video"
         class="max-h-[70vh] w-full rounded-md bg-black"
-        :src="assetDownloadUrl(asset.id)"
         controls
         autoplay
       />
 
       <div v-else-if="asset.media_type === 'audio'" class="rounded-md border bg-muted p-6">
-        <audio class="w-full" :src="assetDownloadUrl(asset.id)" controls autoplay />
+        <AuthedMedia :asset-id="asset.id" kind="audio" class="w-full" controls autoplay />
       </div>
     </div>
   </Dialog>
