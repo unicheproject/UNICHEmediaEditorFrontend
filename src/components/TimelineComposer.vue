@@ -158,7 +158,7 @@ async function exportTimeline() {
 
 <template>
   <Card class="flex min-h-0 flex-col overflow-hidden">
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b py-3 px-4">
       <div>
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="font-semibold">Timeline</h2>
@@ -172,14 +172,14 @@ async function exportTimeline() {
         <Button variant="outline" size="sm" :disabled="!videoTrack.length && !audioBed" @click="clearTimeline">
           Clear
         </Button>
-        <Button :disabled="!videoTrack.length || exporting" @click="exportTimeline">
+        <Button  size="sm" :disabled="!videoTrack.length || exporting" @click="exportTimeline">
           <Download class="h-4 w-4" />
           Export
         </Button>
       </div>
     </div>
 
-    <div class="min-h-0 overflow-auto p-4">
+    <div class="min-h-0 overflow-auto py-3 px-4">
       <div class="min-w-[760px]" :style="{ width: `${timelineWidth}px` }">
         <div class="mb-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>00:00</span>
@@ -206,7 +206,7 @@ async function exportTimeline() {
               <Film class="h-4 w-4 text-primary" />
               Video
             </div>
-            <div class="flex min-h-16 items-center gap-2 overflow-hidden rounded-md bg-muted/60 p-2">
+            <div class="flex min-h-8 items-center gap-2 overflow-hidden rounded-md bg-muted/60 p-2">
               <div
                 v-for="asset in videoTrack"
                 :key="asset.id"
@@ -241,7 +241,7 @@ async function exportTimeline() {
               <Music class="h-4 w-4 text-primary" />
               Audio
             </div>
-            <div class="flex min-h-16 items-center gap-2 overflow-hidden rounded-md bg-muted/60 p-2">
+            <div class="flex min-h-8 items-center gap-2 overflow-hidden rounded-md bg-muted/60 p-2">
               <div
                 v-if="audioBed"
                 class="flex h-12 shrink-0 items-center justify-between gap-3 rounded-md border border-primary/40 bg-card px-3 text-sm shadow-sm"

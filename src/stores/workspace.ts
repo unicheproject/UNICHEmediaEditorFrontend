@@ -32,6 +32,10 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     ),
   );
 
+  const hasRunningJob = computed(() =>
+    jobs.value.some((job) => !TERMINAL_STATUSES.has(job.status)),
+  );
+
   function setError(message: string | null) {
     error.value = message;
   }
@@ -211,6 +215,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     capabilities,
     jobs,
     latestJobs,
+    hasRunningJob,
     selectedAssetIds,
     selectedAssets,
     loading,

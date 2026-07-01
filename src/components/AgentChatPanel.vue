@@ -80,10 +80,11 @@ watch(
   <Teleport to="body">
     <div v-if="chat.open" class="fixed inset-0 z-50">
       <button
-        class="absolute inset-0 cursor-default bg-foreground/30"
+        class="absolute inset-0 cursor-default bg-foreground/30 disabled:cursor-not-allowed"
         type="button"
         aria-label="Close agent chat"
-        @click="chat.closeChat()"
+        :disabled="busy"
+        @click="!busy && chat.closeChat()"
       />
       <div
         class="fixed inset-y-0 right-0 flex w-full max-w-md flex-col border-l bg-card text-card-foreground shadow-xl"
@@ -100,7 +101,7 @@ watch(
               {{ chat.scopeCount }} asset{{ chat.scopeCount === 1 ? "" : "s" }}
             </Badge>
           </div>
-          <Button variant="ghost" size="icon" @click="chat.closeChat()">
+          <Button variant="ghost" size="icon" :disabled="busy" @click="chat.closeChat()">
             <X class="h-4 w-4" />
             <span class="sr-only">Close</span>
           </Button>
@@ -203,14 +204,20 @@ watch(
                 {{ entry.plan.error ?? "The plan failed to run." }}
               </p>
 
-              <p
-                v-else
-                class="mt-3 text-sm text-muted-foreground"
-              >
+              <div v-else class="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-primary" />
                 Running…
-              </p>
+              </div>
             </div>
           </template>
+
+          <div v-if="chat.sending" class="flex justify-start">
+            <div class="flex items-center gap-1 rounded-lg bg-muted px-3 py-2.5">
+              <div class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" style="animation-delay: 0ms" />
+              <div class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" style="animation-delay: 150ms" />
+              <div class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" style="animation-delay: 300ms" />
+            </div>
+          </div>
 
           <p v-if="chat.error" class="text-sm text-destructive">{{ chat.error }}</p>
         </div>

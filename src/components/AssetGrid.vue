@@ -108,7 +108,7 @@ async function uploadFiles(event: Event) {
 </script>
 
 <template>
-  <section class="flex h-full min-h-0 flex-col gap-4">
+  <section class="flex min-h-0 flex-col gap-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-xl font-semibold">Assets</h2>
@@ -142,7 +142,7 @@ async function uploadFiles(event: Event) {
         :key="asset.id"
         :class="
           cn(
-            'group flex cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
+            'group flex h-[300px] cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
             isSelected(asset) && 'border-primary ring-2 ring-primary/20',
           )
         "
@@ -155,7 +155,7 @@ async function uploadFiles(event: Event) {
             v-if="asset.media_type === 'image'"
             :src="assetDownloadUrl(asset.id)"
             :alt="asset.original_filename"
-            class="h-full w-full object-cover"
+            class="aspect-[4/3] h-full w-full object-cover"
           />
           <component
             :is="iconFor(asset.media_type)"

@@ -20,6 +20,10 @@ function statusVariant(status: JobStatus) {
   return "secondary";
 }
 
+function isActive(status: JobStatus) {
+  return status !== "succeeded" && status !== "failed" && status !== "cancelled";
+}
+
 function outputSummary(job: Job) {
   const outputs = job.output?.outputs;
   if (Array.isArray(outputs)) {
@@ -39,16 +43,20 @@ function outputSummary(job: Job) {
       <p class="text-sm text-muted-foreground">Latest project activity</p>
     </div>
 
-    <div v-if="jobs.length" class="space-y-3 overflow-auto pr-1">
+    <div v-if="jobs.length" class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
       <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <h3 class="truncate text-sm font-medium">{{ job.capability_id }}</h3>
             <p class="mt-1 text-xs text-muted-foreground">{{ outputSummary(job) }}</p>
           </div>
-          <Badge :variant="statusVariant(job.status)">
-            {{ job.status }}
-          </Badge>
+          <div class="flex shrink-0 items-center gap-1.5">
+            <div
+              v-if="isActive(job.status)"
+              class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-primary"
+            />
+            <Badge :variant="statusVariant(job.status)">{{ job.status }}</Badge>
+          </div>
         </div>
         <div class="mt-3 h-2 overflow-hidden rounded-full bg-muted">
           <div
