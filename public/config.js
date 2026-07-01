@@ -6,6 +6,6 @@ window.__UNICHE_CONFIG__ = {
   REALM: "uniche",
   CLIENT_ID: "media-editor-web",
   AUDIENCE: "uniche-platform",
-  CATALOGUE_URL: "http://uniche-catalogue.localhost:8080",
+  CATALOGUE_URL: "https://catalogue.uniche-eccch.eu",
   MEDIA_EDITOR_API_URL: "http://localhost:8000",
 };
