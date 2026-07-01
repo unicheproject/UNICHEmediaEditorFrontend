@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import UserMenu from "@/components/UserMenu.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
 
 const emit = defineEmits<{
@@ -126,6 +127,7 @@ async function confirmDeleteProject() {
           <Trash2 class="h-4 w-4" />
           Delete
         </Button>
+        <UserMenu />
       </div>
     </div>
   </header>

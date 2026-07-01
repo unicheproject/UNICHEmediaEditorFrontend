@@ -10,9 +10,18 @@ export const useAuthStore = defineStore("auth", () => {
   const ready = ref(false);
 
   async function bootstrap(): Promise<void> {
-    authenticated.value = await auth.initAuth();
-    profile.value = auth.profile();
-    ready.value = true;
+    // initAuth can reject (e.g. the silent-SSO iframe is blocked by the IdP's CSP
+    // frame-ancestors). Treat any failure as "not authenticated" and still mark
+    // ready, so the app shows the sign-in gate instead of looping through login().
+    try {
+      authenticated.value = await auth.initAuth();
+      profile.value = auth.profile();
+    } catch {
+      authenticated.value = false;
+      profile.value = null;
+    } finally {
+      ready.value = true;
+    }
   }
 
   function login(redirectPath?: string): void {

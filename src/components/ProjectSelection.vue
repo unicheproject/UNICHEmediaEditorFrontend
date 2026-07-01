@@ -9,7 +9,9 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import UserMenu from "@/components/UserMenu.vue";
 import { listOrganisations } from "@/lib/catalogue";
+import { useAuthStore } from "@/stores/auth";
 import { useAuthzStore } from "@/stores/authz";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Organisation, Project } from "@/types/api";
@@ -19,6 +21,7 @@ const emit = defineEmits<{
 }>();
 
 const store = useWorkspaceStore();
+const auth = useAuthStore();
 const authz = useAuthzStore();
 
 const createOpen = ref(false);
@@ -71,6 +74,9 @@ async function loadOrgs() {
 }
 
 onMounted(async () => {
+  if (!auth.authenticated) {
+    return;
+  }
   await authz.load();
   await loadOrgs();
 });
@@ -182,6 +188,7 @@ async function confirmDeleteProject() {
             <FolderPlus class="h-4 w-4" />
             New project
           </Button>
+          <UserMenu />
         </div>
       </div>
     </header>
