@@ -165,7 +165,7 @@ function handlePopState() {
 
         <div
           v-if="activeTab === 'assets'"
-          class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]"
+          class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-1"
         >
           <AssetGrid />
           <aside class="grid min-h-0 gap-4 lg:grid-rows-[1fr_1fr]">
