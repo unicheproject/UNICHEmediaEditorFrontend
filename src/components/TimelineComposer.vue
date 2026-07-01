@@ -167,7 +167,7 @@ async function exportTimeline() {
 
 <template>
   <Card class="flex min-h-0 flex-col overflow-hidden">
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b py-3 px-4">
       <div>
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="font-semibold">Timeline</h2>
@@ -181,7 +181,7 @@ async function exportTimeline() {
         <Button variant="outline" size="sm" :disabled="!videoTrack.length && !audioBed" @click="clearTimeline">
           Clear
         </Button>
-        <Button :disabled="!videoTrack.length || exporting" @click="exportTimeline">
+        <Button  size="sm" :disabled="!videoTrack.length || exporting" @click="exportTimeline">
           <Download class="h-4 w-4" />
           Export
         </Button>
@@ -189,7 +189,7 @@ async function exportTimeline() {
     </div>
 
     <div class="min-h-0 overflow-auto p-4">
-      <div class="min-w-[760px]" :style="{ width: `${timelineWidth}px` }">
+      <div class="min-w-[760px]">
         <div class="mb-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>00:00</span>
           <span>{{ formatTime(totalDuration) }}</span>
