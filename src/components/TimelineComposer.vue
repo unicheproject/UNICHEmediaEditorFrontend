@@ -2,10 +2,11 @@
 import { computed, reactive, ref, watch } from "vue";
 import { Download, Film, Music, Trash2 } from "lucide-vue-next";
 
+import AuthedMedia from "@/components/AuthedMedia.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
-import { fetchAssetObjectUrl } from "@/lib/api";
+import { downloadAsset, fetchAssetObjectUrl } from "@/lib/api";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Asset } from "@/types/api";
 
@@ -15,6 +16,35 @@ const audioBed = ref<Asset | null>(null);
 const durations = reactive<Record<string, number>>({});
 const exporting = ref(false);
 const dragOverChannel = ref<"video" | "audio" | null>(null);
+
+const exportedJobId = ref<string | null>(null);
+const preExportAssetIds = ref<Set<string>>(new Set());
+const exportedComposition = ref<Asset | null>(null);
+
+const exportedJobStatus = computed(
+  () => store.jobs.find((job) => job.id === exportedJobId.value)?.status ?? null,
+);
+
+function tryResolveExportedComposition() {
+  if (!exportedJobId.value) {
+    return;
+  }
+  if (exportedJobStatus.value === "succeeded") {
+    // The job flips to "succeeded" before the store finishes re-fetching assets,
+    // so the produced asset may not be in store.assets yet — keep "Rendering…" until it shows up.
+    const produced = store.assets
+      .filter((asset) => asset.media_type === "video" && !preExportAssetIds.value.has(asset.id))
+      .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))[0];
+    if (produced) {
+      exportedComposition.value = produced;
+      exportedJobId.value = null;
+    }
+  } else if (exportedJobStatus.value === "failed" || exportedJobStatus.value === "cancelled") {
+    exportedJobId.value = null;
+  }
+}
+
+watch(exportedJobStatus, tryResolveExportedComposition);
 
 const secondsPerFallbackClip = 8;
 const pixelsPerSecond = 42;
@@ -34,6 +64,8 @@ watch(
     videoTrack.value = [];
     audioBed.value = null;
     Object.keys(durations).forEach((key) => delete durations[key]);
+    exportedJobId.value = null;
+    exportedComposition.value = null;
   },
 );
 
@@ -45,6 +77,7 @@ watch(
     if (audioBed.value && !assetIds.has(audioBed.value.id)) {
       audioBed.value = null;
     }
+    tryResolveExportedComposition();
   },
 );
 
@@ -153,10 +186,13 @@ async function exportTimeline() {
       input.music_volume = 0.3;
     }
 
-    await store.createJob({
+    preExportAssetIds.value = new Set(store.assets.map((asset) => asset.id));
+    exportedComposition.value = null;
+    const job = await store.createJob({
       capability_id: "video.compose",
       input,
     });
+    exportedJobId.value = job.id;
   } catch (err) {
     store.setError(err instanceof Error ? err.message : "Unable to export timeline");
   } finally {
@@ -271,6 +307,41 @@ async function exportTimeline() {
               </p>
             </div>
           </section>
+        </div>
+      </div>
+
+      <div v-if="exportedJobId || exportedComposition" class="mt-2 border-t pt-4">
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-medium">Exported composition</h3>
+            <p class="text-xs text-muted-foreground">
+              {{ exportedComposition ? exportedComposition.original_filename : "Rendering…" }}
+            </p>
+          </div>
+          <Button
+            v-if="exportedComposition"
+            variant="ghost"
+            size="icon"
+            title="Download composition"
+            @click="downloadAsset(exportedComposition)"
+          >
+            <Download class="h-4 w-4" />
+            <span class="sr-only">Download composition</span>
+          </Button>
+        </div>
+
+        <AuthedMedia
+          v-if="exportedComposition"
+          :asset-id="exportedComposition.id"
+          kind="video"
+          class="max-h-[360px] w-full rounded-md bg-black"
+          controls
+        />
+        <div
+          v-else
+          class="flex h-24 items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
+        >
+          <div class="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       </div>
     </div>
