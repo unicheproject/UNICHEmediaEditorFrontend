@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { FileAudio, Film } from "lucide-vue-next";
+import { computed, ref } from "vue";
+import { FileAudio, Film, Upload } from "lucide-vue-next";
 
 import Badge from "@/components/ui/Badge.vue";
+import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Asset, MediaType } from "@/types/api";
 
 const store = useWorkspaceStore();
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const sortedAssets = computed(() =>
   store.assets
@@ -32,15 +34,42 @@ function dragAsset(asset: Asset, event: DragEvent) {
   );
   event.dataTransfer.setData("text/plain", asset.id);
 }
+
+async function uploadFiles(event: Event) {
+  const files = Array.from((event.target as HTMLInputElement).files ?? []);
+  for (const file of files) {
+    try {
+      await store.uploadAsset(file);
+    } catch (err) {
+      store.setError(err instanceof Error ? err.message : `Unable to upload ${file.name}`);
+    }
+  }
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+}
 </script>
 
 <template>
   <Card class="flex min-h-0 flex-col p-4">
-    <div class="mb-3">
-      <h2 class="font-semibold">Assets</h2>
-      <p class="text-sm text-muted-foreground">
-        {{ sortedAssets.length }} video/audio assets — drag onto the timeline
-      </p>
+    <div class="mb-3 flex items-start justify-between gap-3">
+      <div>
+        <h2 class="font-semibold">Assets</h2>
+        <p class="text-sm text-muted-foreground">
+          {{ sortedAssets.length }} video/audio assets — drag onto the timeline
+        </p>
+      </div>
+      <input ref="fileInput" class="hidden" type="file" multiple @change="uploadFiles" />
+      <Button
+        size="icon"
+        variant="outline"
+        title="Upload asset"
+        :disabled="!store.selectedProjectId || store.uploading"
+        @click="fileInput?.click()"
+      >
+        <Upload class="h-4 w-4" />
+        <span class="sr-only">Upload asset</span>
+      </Button>
     </div>
 
     <div v-if="sortedAssets.length" class="min-h-0 flex-1 space-y-1.5 overflow-auto pr-1">
