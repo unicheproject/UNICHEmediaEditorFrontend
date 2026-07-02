@@ -6,6 +6,11 @@ import type { Asset, Capability, Job, Project } from "@/types/api";
 
 const TERMINAL_STATUSES = new Set(["succeeded", "failed", "cancelled"]);
 
+export interface JobNotice {
+  status: "succeeded" | "failed" | "cancelled";
+  message: string;
+}
+
 export const useWorkspaceStore = defineStore("workspace", () => {
   const projects = ref<Project[]>([]);
   const selectedProjectId = ref<string | null>(null);
@@ -16,6 +21,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
   const loading = ref(false);
   const uploading = ref(false);
   const error = ref<string | null>(null);
+  const jobNotice = ref<JobNotice | null>(null);
   const activePolls = new Map<string, number>();
 
   const selectedProject = computed(
@@ -38,6 +44,14 @@ export const useWorkspaceStore = defineStore("workspace", () => {
 
   function setError(message: string | null) {
     error.value = message;
+  }
+
+  function setJobNotice(notice: JobNotice | null) {
+    jobNotice.value = notice;
+  }
+
+  function capabilityTitle(capabilityId: string) {
+    return capabilities.value.find((capability) => capability.id === capabilityId)?.title ?? capabilityId;
   }
 
   async function loadInitial() {
@@ -199,8 +213,19 @@ export const useWorkspaceStore = defineStore("workspace", () => {
             window.clearInterval(intervalId);
             activePolls.delete(jobId);
           }
-          if (job.status === "succeeded" && selectedProjectId.value) {
-            await loadProjectData(selectedProjectId.value);
+          const title = capabilityTitle(job.capability_id);
+          if (job.status === "succeeded") {
+            jobNotice.value = { status: "succeeded", message: `${title} completed successfully.` };
+            if (selectedProjectId.value) {
+              await loadProjectData(selectedProjectId.value);
+            }
+          } else if (job.status === "failed") {
+            jobNotice.value = {
+              status: "failed",
+              message: job.error ? `${title} failed: ${job.error}` : `${title} failed.`,
+            };
+          } else if (job.status === "cancelled") {
+            jobNotice.value = { status: "cancelled", message: `${title} was cancelled.` };
           }
         }
       } catch (err) {
@@ -226,7 +251,9 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     loading,
     uploading,
     error,
+    jobNotice,
     setError,
+    setJobNotice,
     loadInitial,
     loadProjectData,
     selectProject,

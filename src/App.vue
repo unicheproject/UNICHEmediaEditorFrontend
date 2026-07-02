@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, LogIn } from "lucide-vue-next";
+import { AlertCircle, CheckCircle2, LogIn } from "lucide-vue-next";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
 import ActionPanel from "@/components/ActionPanel.vue";
@@ -110,7 +110,7 @@ function handlePopState() {
 </script>
 
 <template>
-  <div class="min-h-screen">
+  <div class="min-h-screen" :class="{'pointer-events-none':store.hasRunningJob}">
     <!-- Sign-in gate: the app boots only once silent SSO has resolved (see main.ts). -->
     <div
       v-if="auth.ready && !auth.authenticated"
@@ -131,7 +131,7 @@ function handlePopState() {
     <template v-else>
       <div
         v-if="store.error"
-        class="fixed left-1/2 top-4 z-40 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm shadow"
+        class="fixed left-1/2 top-20 z-40 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm shadow"
       >
         <div class="flex min-w-0 items-center gap-2">
           <AlertCircle class="h-4 w-4 shrink-0 text-destructive" />
@@ -140,29 +140,49 @@ function handlePopState() {
         <Button size="sm" variant="ghost" @click="store.setError(null)">Dismiss</Button>
       </div>
 
-      <Teleport to="body">
       <div
-        v-if="store.hasRunningJob"
-        class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+        v-if="store.jobNotice"
+        class="fixed left-1/2 top-20 z-40 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow"
+        :class="
+          store.jobNotice.status === 'succeeded'
+            ? 'border-emerald-600/30 bg-emerald-600/10'
+            : 'border-destructive/30 bg-destructive/10'
+        "
       >
-        <div class="flex flex-col items-center gap-3">
-          <div class="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p class="text-sm font-medium">Job running…</p>
+        <div class="flex min-w-0 items-center gap-2">
+          <CheckCircle2
+            v-if="store.jobNotice.status === 'succeeded'"
+            class="h-4 w-4 shrink-0 text-emerald-600"
+          />
+          <AlertCircle v-else class="h-4 w-4 shrink-0 text-destructive" />
+          <span class="truncate">{{ store.jobNotice.message }}</span>
         </div>
+        <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
-    </Teleport>
 
-    <Teleport to="body">
-      <div
-        v-if="agentChat.sending || agentChat.creatingSession"
-        class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-      >
-        <div class="flex flex-col items-center gap-3">
-          <div class="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p class="text-sm font-medium">Agent thinking…</p>
+      <Teleport to="body">
+        <div
+          v-if="store.hasRunningJob"
+          class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
+            <p class="text-sm font-medium">Job is running…</p>
+          </div>
         </div>
-      </div>
-    </Teleport>
+      </Teleport>
+
+      <Teleport to="body">
+        <div
+          v-if="agentChat.sending || agentChat.creatingSession"
+          class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
+            <p class="text-sm font-medium">Agent is thinking…</p>
+          </div>
+        </div>
+      </Teleport>
 
       <ProjectSelection v-if="showingProjects" @open-project="openProject" />
 
