@@ -9,7 +9,10 @@ import Textarea from "@/components/ui/Textarea.vue";
 import VideoTimelineAction from "@/components/VideoTimelineAction.vue";
 import {
   assetFieldMediaType,
+  fieldHint,
   fieldInputType,
+  fieldMax,
+  fieldMin,
   fieldStep,
   requiredFields,
   visibleInputProperties,
@@ -61,6 +64,21 @@ function fieldLabel(name: string) {
   return name
     .replace(/_/g, " ")
     .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function fieldHintText(name: string, property: JsonSchemaProperty) {
+  if (property.type === "array") {
+    return "Enter comma-separated values.";
+  }
+  return props.action ? fieldHint(props.action.id, name) : undefined;
+}
+
+function inputMin(name: string) {
+  return props.action ? fieldMin(props.action.id, name) : undefined;
+}
+
+function inputMax(name: string) {
+  return props.action ? fieldMax(props.action.id, name) : undefined;
 }
 
 function assetOptions(name: string): Asset[] {
@@ -166,12 +184,14 @@ function submit() {
             v-model="values[name]"
             :type="fieldInputType(property)"
             :step="fieldStep(property)"
+            :min="inputMin(name)"
+            :max="inputMax(name)"
             :required="required.has(name)"
             :placeholder="property.type === 'array' ? 'Comma-separated values' : property.description"
           />
 
-          <span v-if="property.type === 'array'" class="field-hint">
-            Enter comma-separated values.
+          <span v-if="fieldHintText(name, property)" class="field-hint">
+            {{ fieldHintText(name, property) }}
           </span>
         </label>
       </div>

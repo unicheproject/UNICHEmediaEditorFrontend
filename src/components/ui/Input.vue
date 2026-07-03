@@ -8,6 +8,7 @@ defineProps<{
   class?: string;
   required?: boolean;
   min?: string | number;
+  max?: string | number;
   step?: string | number;
 }>();
 
@@ -23,6 +24,7 @@ defineEmits<{
     :placeholder="placeholder"
     :required="required"
     :min="min"
+    :max="max"
     :step="step"
     :class="
       cn(
