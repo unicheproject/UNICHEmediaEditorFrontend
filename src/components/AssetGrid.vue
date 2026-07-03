@@ -192,7 +192,7 @@ async function uploadFiles(event: Event) {
           <p class="mt-1 text-xs text-muted-foreground">
             {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
           </p>
-          <div class="mt-auto flex items-center justify-between gap-2 pt-3">
+          <div class="mt-auto flex items-center justify-between gap-2">
             <span class="truncate text-xs text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
             <div class="flex items-center gap-1">
               <Button

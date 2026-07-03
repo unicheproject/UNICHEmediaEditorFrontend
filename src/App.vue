@@ -131,30 +131,30 @@ function handlePopState() {
     <template v-else>
       <div
         v-if="store.error"
-        class="fixed left-1/2 top-20 z-40 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm shadow"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border border-rose-800 bg-rose-200 text-rose-800 px-4 py-3 text-sm shadow-xl"
       >
         <div class="flex min-w-0 items-center gap-2">
-          <AlertCircle class="h-4 w-4 shrink-0 text-destructive" />
-          <span class="truncate">{{ store.error }}</span>
+          <AlertCircle class="h-4 w-4 shrink-0 text-destructive text-rose-800"/>
+          <span class="truncate ">{{ store.error }}</span>
         </div>
         <Button size="sm" variant="ghost" @click="store.setError(null)">Dismiss</Button>
       </div>
 
       <div
         v-if="store.jobNotice"
-        class="fixed left-1/2 top-20 z-40 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow"
         :class="
           store.jobNotice.status === 'succeeded'
-            ? 'border-emerald-600/30 bg-emerald-600/10'
-            : 'border-destructive/30 bg-destructive/10'
+            ? 'border-emerald-800 bg-emerald-200 text-emerald-800'
+            : 'border-rose-800 bg-rose-200 text-rose-800'
         "
       >
         <div class="flex min-w-0 items-center gap-2">
           <CheckCircle2
             v-if="store.jobNotice.status === 'succeeded'"
-            class="h-4 w-4 shrink-0 text-emerald-600"
+            class="h-4 w-4 shrink-0 text-emerald-800"
           />
-          <AlertCircle v-else class="h-4 w-4 shrink-0 text-destructive" />
+          <AlertCircle v-else class="h-4 w-4 shrink-0 text-destructive text-rose-800" />
           <span class="truncate">{{ store.jobNotice.message }}</span>
         </div>
         <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
