@@ -186,25 +186,6 @@ function handlePopState() {
 
       <ProjectSelection v-if="showingProjects" @open-project="openProject" />
 
-      <!-- <div v-else class="grid min-h-screen grid-rows-[auto_minmax(0,1fr)]">
-        <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
-
-        <main class="grid min-h-0 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <section class="grid min-h-0 gap-4 lg:grid-rows-2">
-            <div class="min-h-0 overflow-hidden">
-              <AssetGrid />
-            </div>
-
-            <TimelineComposer />
-          </section>
-
-          <aside class="grid min-h-0 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(220px,0.7fr)]">
-            <ActionPanel />
-            <JobsPanel />
-          </aside>
-        </main>
-      </div> -->
-
       <div v-else class="grid h-screen grid-rows-[auto_1fr]">
         <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
 
