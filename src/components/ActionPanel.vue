@@ -175,7 +175,7 @@ async function submitAction(params: Record<string, unknown>) {
           <div class="h-px flex-1 bg-border" />
         </div>
 
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-2">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(36px,1fr))] gap-2">
           <div v-for="action in actions" :key="action.id">
             <button
               class="flex aspect-square w-full items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

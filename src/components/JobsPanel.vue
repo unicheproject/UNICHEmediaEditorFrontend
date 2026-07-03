@@ -58,7 +58,7 @@ function outputSummary(job: Job) {
             <Badge :variant="statusVariant(job.status)">{{ job.status }}</Badge>
           </div>
         </div>
-        <div class="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+        <div class="mt-2 h-1 overflow-hidden rounded-full bg-muted">
           <div
             class="h-full rounded-full bg-primary transition-all"
             :style="{ width: `${job.progress}%` }"
