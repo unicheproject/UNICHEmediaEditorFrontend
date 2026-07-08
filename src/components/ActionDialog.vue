@@ -6,6 +6,7 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import ImageCropAction from "@/components/ImageCropAction.vue";
 import VideoTimelineAction from "@/components/VideoTimelineAction.vue";
 import {
   assetFieldMediaType,
@@ -41,6 +42,13 @@ const timelineAsset = computed(() => {
   }
   const [asset] = store.selectedAssets;
   return asset?.media_type === "video" ? asset : null;
+});
+const cropAsset = computed(() => {
+  if (!props.action || props.action.id !== "image.crop") {
+    return null;
+  }
+  const [asset] = store.selectedAssets;
+  return asset?.media_type === "image" ? asset : null;
 });
 
 watch(
@@ -136,6 +144,15 @@ function submit() {
     :open="open"
     :action="action"
     :asset="timelineAsset"
+    @close="emit('close')"
+    @submit="emit('submit', $event)"
+  />
+
+  <ImageCropAction
+    v-else-if="action && cropAsset"
+    :open="open"
+    :action="action"
+    :asset="cropAsset"
     @close="emit('close')"
     @submit="emit('submit', $event)"
   />
