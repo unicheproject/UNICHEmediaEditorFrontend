@@ -1,5 +1,7 @@
 import {
+  Activity,
   AudioLines,
+  AudioWaveform,
   Bot,
   Captions,
   Combine,
@@ -18,6 +20,7 @@ import {
   Scissors,
   SlidersHorizontal,
   Sparkles,
+  Speech,
   Split,
   Subtitles,
   Tags,
@@ -69,14 +72,14 @@ const byId: Record<string, Presentation> = {
 
   "audio.transcribe": { group: "Audio", icon: Mic, order: 510 },
   "subtitle.autogenerate": { group: "Audio", icon: Subtitles, order: 520 },
-  "audio.tts": { group: "Audio", icon: AudioLines, order: 530 },
+  "audio.tts": { group: "Audio", icon: Speech, order: 530 },
   "audio.music.generate": { group: "Audio", icon: Music, order: 540 },
-  "audio.denoise": { group: "Audio", icon: SlidersHorizontal, order: 550 },
+  "audio.denoise": { group: "Audio", icon: AudioWaveform, order: 550 },
   "audio.separate.stems": { group: "Audio", icon: Split, order: 560 },
   "audio.trim": { group: "Audio", icon: Scissors, order: 570 },
   "audio.concat": { group: "Audio", icon: Combine, order: 580 },
   "audio.gain": { group: "Audio", icon: Gauge, order: 590 },
-  "audio.normalize": { group: "Audio", icon: SlidersHorizontal, order: 600 },
+  "audio.normalize": { group: "Audio", icon: Activity, order: 600 },
   "audio.fade": { group: "Audio", icon: AudioLines, order: 610 },
   "audio.transcode": { group: "Audio", icon: FileAudio, order: 620 },
 };
