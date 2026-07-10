@@ -244,6 +244,11 @@ const FIELD_META: Record<string, FieldMeta> = {
     min: -60,
     max: 60,
   },
+  "audio.denoise.strength": {
+    hint: "How aggressively background noise is removed, from 0.0 (off) to 1.0 (maximum). Example: 0.5",
+    min: 0,
+    max: 1,
+  },
 };
 
 export function fieldHint(capabilityId: string, fieldName: string): string | undefined {
