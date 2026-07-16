@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-vue-next";
 import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
 import { useAssetObjectUrl } from "@/composables/useAssetObjectUrl";
+import { useWorkspaceStore } from "@/stores/workspace";
 import type { Asset, Capability } from "@/types/api";
 
 const props = defineProps<{
@@ -13,6 +14,7 @@ const props = defineProps<{
   open: boolean;
 }>();
 
+const store = useWorkspaceStore();
 const { url: videoUrl } = useAssetObjectUrl(() => props.asset.id);
 
 const emit = defineEmits<{
@@ -41,6 +43,20 @@ watch(
     markers.value = [];
     error.value = null;
   },
+);
+
+watch(
+  () => store.shotDetectResult,
+  (result) => {
+    if (isSplit.value && result && result.assetId === props.asset.id) {
+      console.log(result.shots)
+      markers.value = result.shots
+        .filter((shot) => shot.start > 0)
+        .map((shot) => Number(shot.start.toFixed(3)));
+      console.log(markers.value)
+    }
+  },
+  { immediate: true },
 );
 
 function formatTime(value: number) {
@@ -100,6 +116,7 @@ function addMarkerAtCurrent() {
   }
   markers.value = [...markers.value, next].sort((left, right) => left - right);
   error.value = null;
+  console.log(markers.value);
 }
 
 function removeMarker(marker: number) {

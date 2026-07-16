@@ -2,13 +2,18 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 import { api } from "@/lib/api";
-import type { Asset, Capability, Job, Project } from "@/types/api";
+import type { Asset, Capability, Job, Project, ShotDetectShot } from "@/types/api";
 
 const TERMINAL_STATUSES = new Set(["succeeded", "failed", "cancelled"]);
 
 export interface JobNotice {
   status: "succeeded" | "failed" | "cancelled";
   message: string;
+}
+
+export interface ShotDetectResult {
+  assetId: string;
+  shots: ShotDetectShot[];
 }
 
 export const useWorkspaceStore = defineStore("workspace", () => {
@@ -22,6 +27,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
   const uploading = ref(false);
   const error = ref<string | null>(null);
   const jobNotice = ref<JobNotice | null>(null);
+  const shotDetectResult = ref<ShotDetectResult | null>(null);
   const activePolls = new Map<string, number>();
 
   const selectedProject = computed(
@@ -48,6 +54,10 @@ export const useWorkspaceStore = defineStore("workspace", () => {
 
   function setJobNotice(notice: JobNotice | null) {
     jobNotice.value = notice;
+  }
+
+  function clearShotDetectResult() {
+    shotDetectResult.value = null;
   }
 
   function capabilityTitle(capabilityId: string) {
@@ -219,6 +229,12 @@ export const useWorkspaceStore = defineStore("workspace", () => {
             if (selectedProjectId.value) {
               await loadProjectData(selectedProjectId.value);
             }
+            if (job.capability_id === "video.shot.detect" && job.asset_id) {
+              const output = job.output as { shots?: ShotDetectShot[] } | null;
+              if (Array.isArray(output?.shots) && output.shots.length) {
+                shotDetectResult.value = { assetId: job.asset_id, shots: output.shots };
+              }
+            }
           } else if (job.status === "failed") {
             jobNotice.value = {
               status: "failed",
@@ -252,8 +268,10 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     uploading,
     error,
     jobNotice,
+    shotDetectResult,
     setError,
     setJobNotice,
+    clearShotDetectResult,
     loadInitial,
     loadProjectData,
     selectProject,

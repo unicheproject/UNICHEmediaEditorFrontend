@@ -83,6 +83,14 @@ export interface Job {
   finished_at: string | null;
 }
 
+export interface ShotDetectShot {
+  index: number;
+  start: number;
+  end: number;
+  start_frame: number;
+  end_frame: number;
+}
+
 export interface Page<T> {
   items: T[];
   total: number;

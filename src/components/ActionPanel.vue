@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 import ActionDialog from "@/components/ActionDialog.vue";
 import AgentChatPanel from "@/components/AgentChatPanel.vue";
@@ -85,6 +85,31 @@ function openAction(action: ActionOption) {
   dialogOpen.value = true;
 }
 
+function closeDialog() {
+  dialogOpen.value = false;
+  selectedAction.value = null;
+  store.clearShotDetectResult();
+}
+
+watch(
+  () => store.shotDetectResult,
+  (result) => {
+    if (!result) {
+      return;
+    }
+    const asset = store.assets.find((candidate) => candidate.id === result.assetId);
+    const splitCapability = store.capabilities.find((capability) => capability.id === "video.split");
+    if (asset && splitCapability) {
+      store.clearSelection();
+      store.toggleAsset(asset.id);
+      selectedAction.value = splitCapability;
+      dialogOpen.value = true;
+    } else {
+      store.clearShotDetectResult();
+    }
+  },
+);
+
 function showTooltip(action: ActionOption, event: MouseEvent | FocusEvent) {
   const target = event.currentTarget as HTMLElement;
   const rect = target.getBoundingClientRect();
@@ -136,8 +161,7 @@ async function submitAction(params: Record<string, unknown>) {
     }
 
     await store.createJob(payload);
-    dialogOpen.value = false;
-    selectedAction.value = null;
+    closeDialog();
   } catch (err) {
     store.setError(err instanceof Error ? err.message : "Unable to create job");
   } finally {
@@ -226,7 +250,7 @@ async function submitAction(params: Record<string, unknown>) {
   <ActionDialog
     :open="dialogOpen"
     :action="selectedAction"
-    @close="dialogOpen = false"
+    @close="closeDialog"
     @submit="submitAction"
   />
 
