@@ -7,5 +7,5 @@ window.__UNICHE_CONFIG__ = {
   CLIENT_ID: "media-editor-web",
   AUDIENCE: "uniche-platform",
   CATALOGUE_URL: "https://catalogue.uniche-eccch.eu",
-  MEDIA_EDITOR_API_URL: "http://localhost:8000",
+  MEDIA_EDITOR_API_URL: "https://uniche-media-editor-api.cfserver3.net",
 };
