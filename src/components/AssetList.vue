@@ -54,7 +54,7 @@ async function uploadFiles(event: Event) {
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
-        <h2 class="font-semibold">Assets</h2>
+        <h2>Assets</h2>
         <p class="text-sm text-muted-foreground">
           {{ sortedAssets.length }} video/audio assets — drag onto the timeline
         </p>

@@ -91,7 +91,7 @@ async function confirmDeleteProject() {
         </Button>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-xl font-semibold">UNICHE Media Editor</h1>
+            <h2>UNICHE Media Editor</h2>
             <Badge variant="secondary">Project workspace</Badge>
           </div>
           <p class="mt-1 truncate text-sm text-muted-foreground">

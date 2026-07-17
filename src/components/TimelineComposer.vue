@@ -206,7 +206,7 @@ async function exportTimeline() {
     <div class="flex flex-wrap items-center justify-between gap-3 border-b py-3 px-4">
       <div>
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="font-semibold">Timeline</h2>
+          <h2>Timeline</h2>
           <Badge variant="secondary">Compose / Export</Badge>
         </div>
         <p class="text-sm text-muted-foreground">

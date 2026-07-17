@@ -39,7 +39,7 @@ function outputSummary(job: Job) {
 <template>
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3">
-      <h2 class="font-semibold">Jobs</h2>
+      <h3>Jobs</h3>
       <p class="text-sm text-muted-foreground">Latest project activity</p>
     </div>
 

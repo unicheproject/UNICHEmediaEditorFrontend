@@ -174,7 +174,7 @@ async function submitAction(params: Record<string, unknown>) {
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
-        <h2 class="font-semibold">Actions</h2>
+        <h3>Actions</h3>
         <p class="text-sm text-muted-foreground">
           {{ store.selectedAssets.length }} selected
         </p>

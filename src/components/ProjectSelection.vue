@@ -176,7 +176,7 @@ async function confirmDeleteProject() {
     <header class="border-b bg-card">
       <div class="container flex min-h-20 items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-semibold">UNICHE Media Editor</h1>
+          <h2>UNICHE Media Editor</h2>
           <p class="text-sm text-muted-foreground">Select a project to manage its assets.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -206,7 +206,7 @@ async function confirmDeleteProject() {
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <h2 class="line-clamp-2 text-lg font-semibold">{{ project.name }}</h2>
+              <h2 class="line-clamp-2">{{ project.name }}</h2>
               <p class="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
                 {{ project.description || "No description" }}
               </p>
@@ -240,7 +240,7 @@ async function confirmDeleteProject() {
       <Card v-else class="flex min-h-96 items-center justify-center border-dashed p-8 text-center">
         <div class="max-w-sm">
           <FolderPlus class="mx-auto h-10 w-10 text-muted-foreground" />
-          <h2 class="mt-3 font-medium">No projects yet</h2>
+          <h2>No projects yet</h2>
           <template v-if="canCreate">
             <p class="mt-1 text-sm text-muted-foreground">
               Create a project before uploading and processing media assets.

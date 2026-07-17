@@ -117,8 +117,8 @@ function handlePopState() {
       class="flex min-h-screen items-center justify-center p-6"
     >
       <div class="max-w-sm rounded-xl border bg-card p-8 text-center shadow-sm">
-        <h1 class="text-2xl font-semibold">UNICHE Media Editor</h1>
-        <p class="mt-2 text-sm text-muted-foreground">
+        <h3>UNICHE Media Editor</h3>
+        <p class="mt-2 text-muted-foreground">
           Sign in with your UNICHE account to continue.
         </p>
         <Button class="mt-6" @click="signIn">

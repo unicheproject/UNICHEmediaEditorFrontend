@@ -96,7 +96,7 @@ watch(
         <div class="flex items-center justify-between gap-3 border-b px-4 py-3">
           <div class="flex items-center gap-2">
             <Bot class="h-5 w-5 text-primary" />
-            <h2 class="font-semibold">Agent</h2>
+            <h2>Agent</h2>
             <Badge variant="outline">
               {{ chat.scopeCount }} asset{{ chat.scopeCount === 1 ? "" : "s" }}
             </Badge>

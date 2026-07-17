@@ -112,7 +112,7 @@ async function uploadFiles(event: Event) {
   <section class="flex min-h-0 flex-col gap-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2 class="text-xl font-semibold">Assets</h2>
+        <h2>Assets</h2>
         <p class="text-sm text-muted-foreground">
           {{ store.assets.length }} uploaded or derived assets
         </p>

@@ -4,8 +4,10 @@
 
 @layer base {
   :root {
+    --foreground: 222 84% 5%;        /* #030712 (gray-950) */
+    --body: 220 9% 31%;              /* #374151 (gray-700) */
+    --muted-foreground: 220 9% 46%;  /* #6b7280 (gray-500) */
     --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
@@ -15,7 +17,6 @@
     --secondary: 214 32% 91%;
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 94%;
-    --muted-foreground: 215 16% 42%;
     --accent: 38 92% 50%;
     --accent-foreground: 24 10% 10%;
     --destructive: 0 72% 48%;
@@ -31,9 +32,25 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans text-sm font-normal leading-6 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow: hidden;
+  }
+
+  h1 {
+    @apply text-5xl font-extrabold tracking-[-0.025em];
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-[-0.01em];
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+
+  p {
+    @apply text-sm font-normal leading-6;
   }
 }
 
