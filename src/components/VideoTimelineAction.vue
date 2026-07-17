@@ -29,6 +29,7 @@ const start = ref(0);
 const end = ref(0);
 const markers = ref<number[]>([]);
 const error = ref<string | null>(null);
+const singleShotDetected = ref(false);
 
 const isTrim = computed(() => props.action.id === "video.trim");
 const isSplit = computed(() => props.action.id === "video.split");
@@ -42,6 +43,7 @@ watch(
     end.value = duration.value;
     markers.value = [];
     error.value = null;
+    singleShotDetected.value = false;
   },
 );
 
@@ -49,11 +51,10 @@ watch(
   () => store.shotDetectResult,
   (result) => {
     if (isSplit.value && result && result.assetId === props.asset.id) {
-      console.log(result.shots)
       markers.value = result.shots
         .filter((shot) => shot.start > 0)
         .map((shot) => Number(shot.start.toFixed(3)));
-      console.log(markers.value)
+      singleShotDetected.value = result.shots.length <= 1;
     }
   },
   { immediate: true },
@@ -262,6 +263,14 @@ function submit() {
             Add marker
           </Button>
         </div>
+
+        <p
+          v-if="singleShotDetected"
+          class="mt-3 rounded-md border border-primary/30 bg-primary/10 p-3 text-sm text-muted-foreground"
+        >
+          Shot detection found only a single shot in this video, so no split markers were
+          prefilled. Add markers manually at the points where you want to split.
+        </p>
 
         <div v-if="sortedMarkers.length" class="mt-4 grid gap-2">
           <div
