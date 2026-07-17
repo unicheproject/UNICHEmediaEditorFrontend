@@ -218,6 +218,11 @@ const FIELD_META: Record<string, FieldMeta> = {
     min: 0,
     max: 200,
   },
+  "image.upscale": {
+    hint: "Allowed range: 2–4 (default: 4)",
+    min: 2,
+    max: 4,
+  },
   "audio.mix.music_asset_id": {
     hint: "Background music or narration track to mix under the selected asset.",
   },
@@ -248,6 +253,11 @@ const FIELD_META: Record<string, FieldMeta> = {
     hint: "How aggressively background noise is removed, from 0.0 (off) to 1.0 (maximum). Example: 0.5",
     min: 0,
     max: 1,
+  },
+  "video.shot.detect.threshold": {
+    hint: "Scene-change sensitivity, from 0 (very sensitive, detects more shots) to 255 (less sensitive, detects fewer shots). Default: 27. Example: 27",
+    min: 0,
+    max: 255,
   },
 };
 
