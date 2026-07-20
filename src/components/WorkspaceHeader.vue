@@ -94,7 +94,7 @@ async function confirmDeleteProject() {
             <h2>UNICHE Media Editor</h2>
             <Badge variant="secondary">Project workspace</Badge>
           </div>
-          <p class="mt-1 truncate text-sm text-muted-foreground">
+          <p class="mt-1 truncate text-muted-foreground">
             {{ store.selectedProject?.name ?? "No project selected" }}
           </p>
         </div>

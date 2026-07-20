@@ -167,7 +167,7 @@ function handlePopState() {
         >
           <div class="flex flex-col items-center gap-3">
             <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p class="text-sm font-medium">Job is running…</p>
+            <p>Job is running…</p>
           </div>
         </div>
       </Teleport>
@@ -179,7 +179,7 @@ function handlePopState() {
         >
           <div class="flex flex-col items-center gap-3">
             <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p class="text-sm font-medium">Agent is thinking…</p>
+            <p>Agent is thinking…</p>
           </div>
         </div>
       </Teleport>
@@ -192,7 +192,7 @@ function handlePopState() {
         <main class="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
           <div class="flex items-center gap-1 rounded-lg bg-muted p-1 self-start">
             <button
-              class="rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+              class="rounded-md px-4 py-1.5 transition-colors"
               :class="
                 activeTab === 'assets'
                   ? 'bg-background text-foreground shadow-sm'
@@ -203,7 +203,7 @@ function handlePopState() {
               Assets
             </button>
             <button
-              class="rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+              class="rounded-md px-4 py-1.5 transition-colors"
               :class="
                 activeTab === 'timeline'
                   ? 'bg-background text-foreground shadow-sm'

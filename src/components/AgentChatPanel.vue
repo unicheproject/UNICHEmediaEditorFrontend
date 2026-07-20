@@ -109,13 +109,13 @@ watch(
 
         <!-- Scrollback -->
         <div ref="scrollEl" class="flex-1 space-y-3 overflow-auto px-4 py-4">
-          <p v-if="chat.creatingSession" class="text-sm text-muted-foreground">
+          <p v-if="chat.creatingSession" class="text-muted-foreground">
             Starting a session…
           </p>
 
           <p
             v-else-if="chat.messages.length === 0"
-            class="rounded-md border border-dashed p-4 text-sm text-muted-foreground"
+            class="rounded-md border border-dashed p-4 text-muted-foreground"
           >
             Describe what you'd like to do with the selected assets. The agent will propose a
             plan you can review before it runs.
@@ -139,13 +139,13 @@ watch(
             <!-- Plan card -->
             <div v-else class="rounded-lg border bg-background p-3">
               <div class="mb-2 flex items-start justify-between gap-2">
-                <p class="text-sm font-medium">Proposed plan</p>
+                <p>Proposed plan</p>
                 <Badge :variant="planStatusVariant(entry.plan.status)">
                   {{ entry.plan.status }}
                 </Badge>
               </div>
 
-              <p v-if="entry.plan.summary" class="mb-3 text-sm text-muted-foreground">
+              <p v-if="entry.plan.summary" class="mb-3 text-muted-foreground">
                 {{ entry.plan.summary }}
               </p>
 
@@ -166,12 +166,12 @@ watch(
                       {{ runFor(entry.plan, step)?.status }}
                     </Badge>
                   </div>
-                  <p v-if="paramsSummary(step)" class="mt-1 text-xs text-muted-foreground">
+                  <p v-if="paramsSummary(step)" class="mt-1 text-muted-foreground">
                     {{ paramsSummary(step) }}
                   </p>
                   <p
                     v-if="runFor(entry.plan, step)?.error"
-                    class="mt-1 text-xs text-destructive"
+                    class="mt-1 text-destructive"
                   >
                     {{ runFor(entry.plan, step)?.error }}
                   </p>
@@ -189,7 +189,7 @@ watch(
 
               <p
                 v-else-if="entry.plan.status === 'succeeded'"
-                class="mt-3 text-sm text-emerald-700"
+                class="mt-3 text-emerald-700"
               >
                 Done — {{ entry.plan.result_asset_ids.length }} new asset{{
                   entry.plan.result_asset_ids.length === 1 ? "" : "s"
@@ -199,7 +199,7 @@ watch(
 
               <p
                 v-else-if="entry.plan.status === 'failed'"
-                class="mt-3 text-sm text-destructive"
+                class="mt-3 text-destructive"
               >
                 {{ entry.plan.error ?? "The plan failed to run." }}
               </p>
@@ -219,7 +219,7 @@ watch(
             </div>
           </div>
 
-          <p v-if="chat.error" class="text-sm text-destructive">{{ chat.error }}</p>
+          <p v-if="chat.error" class="text-destructive">{{ chat.error }}</p>
         </div>
 
         <!-- Composer -->

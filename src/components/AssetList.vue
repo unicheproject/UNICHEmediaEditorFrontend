@@ -55,7 +55,7 @@ async function uploadFiles(event: Event) {
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
         <h2>Assets</h2>
-        <p class="text-sm text-muted-foreground">
+        <p class="text-muted-foreground">
           {{ sortedAssets.length }} video/audio assets — drag onto the timeline
         </p>
       </div>
@@ -95,7 +95,7 @@ async function uploadFiles(event: Event) {
     </div>
 
     <div v-else class="rounded-md border border-dashed p-4">
-      <p class="text-sm text-muted-foreground">No assets yet.</p>
+      <p class="text-muted-foreground">No assets yet.</p>
     </div>
   </Card>
 </template>

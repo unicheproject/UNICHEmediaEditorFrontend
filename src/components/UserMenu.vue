@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
       class="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-background p-1 shadow-md"
     >
       <div class="border-b px-3 py-2">
-        <p class="truncate text-sm font-medium">
+        <p class="truncate">
           {{ profile?.name ?? profile?.username ?? "—" }}
         </p>
         <p class="truncate text-xs text-muted-foreground">{{ profile?.email ?? "—" }}</p>

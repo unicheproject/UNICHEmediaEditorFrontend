@@ -38,7 +38,7 @@ const emit = defineEmits<{
         <div class="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2>{{ title }}</h2>
-            <p v-if="description" class="mt-1 text-sm text-muted-foreground">
+            <p v-if="description" class="mt-1 text-muted-foreground">
               {{ description }}
             </p>
           </div>

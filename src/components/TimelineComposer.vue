@@ -209,7 +209,7 @@ async function exportTimeline() {
           <h2>Timeline</h2>
           <Badge variant="secondary">Compose / Export</Badge>
         </div>
-        <p class="text-sm text-muted-foreground">
+        <p class="text-muted-foreground">
           {{ formatTime(totalDuration) }} sequence
         </p>
       </div>
@@ -268,7 +268,7 @@ async function exportTimeline() {
                   <Trash2 class="h-4 w-4 text-destructive" />
                 </button>
               </div>
-              <p v-if="!videoTrack.length" class="text-sm text-muted-foreground">
+              <p v-if="!videoTrack.length" class="text-muted-foreground">
                 Drop video assets here.
               </p>
             </div>
@@ -302,7 +302,7 @@ async function exportTimeline() {
                   <Trash2 class="h-4 w-4 text-destructive" />
                 </button>
               </div>
-              <p v-else class="text-sm text-muted-foreground">
+              <p v-else class="ttext-muted-foreground">
                 Drop an audio asset here.
               </p>
             </div>
@@ -313,8 +313,8 @@ async function exportTimeline() {
       <div v-if="exportedJobId || exportedComposition" class="mt-2 border-t pt-4">
         <div class="mb-2 flex items-center justify-between gap-3">
           <div>
-            <h3 class="text-sm font-medium">Exported composition</h3>
-            <p class="text-xs text-muted-foreground">
+            <h3>Exported composition</h3>
+            <p class="text-muted-foreground">
               {{ exportedComposition ? exportedComposition.original_filename : "Rendering…" }}
             </p>
           </div>

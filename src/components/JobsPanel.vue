@@ -40,15 +40,15 @@ function outputSummary(job: Job) {
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3">
       <h3>Jobs</h3>
-      <p class="text-sm text-muted-foreground">Latest project activity</p>
+      <p class="text-muted-foreground">Latest project activity</p>
     </div>
 
     <div v-if="jobs.length" class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
       <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <h3 class="truncate text-sm font-medium">{{ job.capability_id }}</h3>
-            <p class="mt-1 text-xs text-muted-foreground">{{ outputSummary(job) }}</p>
+            <h3 class="truncate">{{ job.capability_id }}</h3>
+            <p class="mt-1 text-muted-foreground">{{ outputSummary(job) }}</p>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
             <div
@@ -67,7 +67,7 @@ function outputSummary(job: Job) {
       </article>
     </div>
 
-    <p v-else class="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+    <p v-else class="rounded-md border border-dashed p-4 text-muted-foreground">
       Created jobs will appear here with live polling until they finish.
     </p>
   </Card>

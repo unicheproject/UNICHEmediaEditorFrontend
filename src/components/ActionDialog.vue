@@ -213,7 +213,7 @@ function submit() {
         </label>
       </div>
 
-      <p v-else class="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+      <p v-else class="rounded-md bg-muted p-3 text-muted-foreground">
         This action does not require extra parameters.
       </p>
 

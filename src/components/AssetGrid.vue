@@ -113,7 +113,7 @@ async function uploadFiles(event: Event) {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2>Assets</h2>
-        <p class="text-sm text-muted-foreground">
+        <p class="text-muted-foreground">
           {{ store.assets.length }} uploaded or derived assets
         </p>
       </div>
@@ -186,7 +186,7 @@ async function uploadFiles(event: Event) {
           </Button>
         </div>
         <div class="flex min-h-32 flex-1 flex-col p-3">
-          <h3 class="line-clamp-2 text-sm font-medium" :title="asset.original_filename">
+          <h3 class="line-clamp-2" :title="asset.original_filename">
             {{ asset.original_filename }}
           </h3>
           <p class="mt-1 text-xs text-muted-foreground">
@@ -222,8 +222,8 @@ async function uploadFiles(event: Event) {
     <Card v-else class="flex min-h-0 flex-1 items-center justify-center border-dashed p-8 text-center">
       <div class="max-w-sm">
         <Upload class="mx-auto h-10 w-10 text-muted-foreground" />
-        <h3 class="mt-3 font-medium">No assets yet</h3>
-        <p class="mt-1 text-sm text-muted-foreground">
+        <h3 class="mt-3">No assets yet</h3>
+        <p class="mt-1 text-muted-foreground">
           Upload images, audio, video, or subtitle files to make actions available.
         </p>
       </div>

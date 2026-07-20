@@ -175,7 +175,7 @@ async function submitAction(params: Record<string, unknown>) {
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
         <h3>Actions</h3>
-        <p class="text-sm text-muted-foreground">
+        <p class="text-muted-foreground">
           {{ store.selectedAssets.length }} selected
         </p>
       </div>
@@ -185,7 +185,7 @@ async function submitAction(params: Record<string, unknown>) {
     </div>
 
     <div v-if="store.selectedAssets.length === 0" class="rounded-md border border-dashed p-4">
-      <p class="text-sm text-muted-foreground">
+      <p class="text-muted-foreground">
         Select one or more assets to see compatible capabilities.
       </p>
     </div>
@@ -193,7 +193,7 @@ async function submitAction(params: Record<string, unknown>) {
     <div v-else class="space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
       <section v-for="[group, actions] in groupedActions" :key="group" class="space-y-2">
         <div class="flex items-center justify-between gap-2">
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <h3 class="uppercase tracking-wide text-muted-foreground">
             {{ group }}
           </h3>
           <div class="h-px flex-1 bg-border" />
@@ -228,7 +228,7 @@ async function submitAction(params: Record<string, unknown>) {
       role="tooltip"
     >
       <div class="mb-2 flex flex-wrap items-center gap-2">
-        <p class="text-sm font-medium">{{ hoveredAction.title }}</p>
+        <p>{{ hoveredAction.title }}</p>
         <Badge v-if="isAgentAction(hoveredAction)" variant="secondary">Chat</Badge>
         <Badge v-else variant="secondary">{{ costLabel(hoveredAction.cost_class) }}</Badge>
         <Badge
@@ -238,10 +238,10 @@ async function submitAction(params: Record<string, unknown>) {
           Multi
         </Badge>
       </div>
-      <p class="text-xs leading-5 text-muted-foreground">
+      <p class="leading-5 text-muted-foreground">
         {{ hoveredAction.description }}
       </p>
-      <p v-if="!isAgentAction(hoveredAction)" class="mt-2 text-xs text-muted-foreground">
+      <p v-if="!isAgentAction(hoveredAction)" class="mt-2 text-muted-foreground">
         {{ hoveredAction.supported_media_types.join(", ") }}
       </p>
     </div>

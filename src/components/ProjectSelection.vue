@@ -177,7 +177,7 @@ async function confirmDeleteProject() {
       <div class="container flex min-h-20 items-center justify-between gap-4">
         <div>
           <h2>UNICHE Media Editor</h2>
-          <p class="text-sm text-muted-foreground">Select a project to manage its assets.</p>
+          <p class="text-muted-foreground">Select a project to manage its assets.</p>
         </div>
         <div class="flex items-center gap-2">
           <Button variant="outline" @click="store.loadInitial">
@@ -206,8 +206,8 @@ async function confirmDeleteProject() {
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <h2 class="line-clamp-2">{{ project.name }}</h2>
-              <p class="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
+              <h3 class="line-clamp-2">{{ project.name }}</h3>
+              <p class="mt-2 line-clamp-3 leading-6 text-muted-foreground">
                 {{ project.description || "No description" }}
               </p>
             </div>
@@ -242,7 +242,7 @@ async function confirmDeleteProject() {
           <FolderPlus class="mx-auto h-10 w-10 text-muted-foreground" />
           <h2>No projects yet</h2>
           <template v-if="canCreate">
-            <p class="mt-1 text-sm text-muted-foreground">
+            <p class="mt-1 text-muted-foreground">
               Create a project before uploading and processing media assets.
             </p>
             <Button class="mt-4" @click="openCreate">
@@ -250,7 +250,7 @@ async function confirmDeleteProject() {
               New project
             </Button>
           </template>
-          <p v-else class="mt-1 text-sm text-muted-foreground">
+          <p v-else class="mt-1 text-muted-foreground">
             You don't manage any organisation yet. Ask an organisation manager to add you, or
             create the project in the UNICHE Portal.
           </p>

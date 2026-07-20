@@ -212,8 +212,8 @@ function submit() {
         <div class="rounded-lg border bg-background p-4">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <p class="text-sm font-medium">Start</p>
-              <p class="text-sm text-muted-foreground">{{ formatTime(start) }}</p>
+              <p>Start</p>
+              <p class="text-muted-foreground">{{ formatTime(start) }}</p>
             </div>
             <Button variant="outline" size="sm" @click="setStartToCurrent">
               Use playhead
@@ -232,8 +232,8 @@ function submit() {
         <div class="rounded-lg border bg-background p-4">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <p class="text-sm font-medium">End</p>
-              <p class="text-sm text-muted-foreground">{{ formatTime(end) }}</p>
+              <p>End</p>
+              <p class="text-muted-foreground">{{ formatTime(end) }}</p>
             </div>
             <Button variant="outline" size="sm" @click="setEndToCurrent">
               Use playhead
@@ -253,8 +253,8 @@ function submit() {
       <div v-if="isSplit" class="rounded-lg border bg-background p-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="text-sm font-medium">Split markers</p>
-            <p class="text-sm text-muted-foreground">
+            <p>Split markers</p>
+            <p class="text-muted-foreground">
               Add markers at the current playhead position.
             </p>
           </div>
@@ -288,7 +288,7 @@ function submit() {
         </div>
       </div>
 
-      <p v-if="error" class="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm">
+      <p v-if="error" class="rounded-md border border-destructive/30 bg-destructive/10 p-3">
         {{ error }}
       </p>
 
