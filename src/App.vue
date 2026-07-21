@@ -131,7 +131,7 @@ function handlePopState() {
     <template v-else>
       <div
         v-if="store.error"
-        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] border-[#c0185e] bg-[#fbeff4] text-foreground px-4 py-3 text-sm"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] border-[#c0185e] bg-[#fbeff4] text-foreground px-4 py-[18px] text-sm"
       >
         <div class="flex min-w-0 items-center gap-2">
           <X class="h-4 w-4 shrink-0 text-foreground"/>
@@ -142,7 +142,7 @@ function handlePopState() {
 
       <div
         v-if="store.jobNotice"
-        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] px-4 py-3 text-[13px] font-bold"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] px-4 py-[18px] text-[13px] font-bold"
         :class="
           store.jobNotice.status === 'succeeded'
             ? 'border-[#0f7a6e] bg-[#eef6f5]'
@@ -155,7 +155,7 @@ function handlePopState() {
             class="h-4 w-4 shrink-0 text-foreground"
           />
           <X v-else class="h-4 w-4 shrink-0 text-foreground" />
-          <span class="truncate">'succeeded'</span>
+          <span class="truncate">{{ store.jobNotice.message }}</span>
         </div>
         <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
