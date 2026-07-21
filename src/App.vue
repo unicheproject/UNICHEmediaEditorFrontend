@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, CheckCircle2, LogIn } from "lucide-vue-next";
+import { X, Check, LogIn } from "lucide-vue-next";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
 import ActionPanel from "@/components/ActionPanel.vue";
@@ -131,10 +131,10 @@ function handlePopState() {
     <template v-else>
       <div
         v-if="store.error"
-        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border border-rose-800 bg-rose-200 text-rose-800 px-4 py-3 text-sm shadow-xl"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] border-[#c0185e] bg-[#fbeff4] text-foreground px-4 py-3 text-sm"
       >
         <div class="flex min-w-0 items-center gap-2">
-          <AlertCircle class="h-4 w-4 shrink-0 text-destructive text-rose-800"/>
+          <X class="h-4 w-4 shrink-0 text-foreground"/>
           <span class="truncate ">{{ store.error }}</span>
         </div>
         <Button size="sm" variant="ghost" @click="store.setError(null)">Dismiss</Button>
@@ -142,32 +142,32 @@ function handlePopState() {
 
       <div
         v-if="store.jobNotice"
-        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow"
+        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] px-4 py-3 text-[13px] font-bold"
         :class="
           store.jobNotice.status === 'succeeded'
-            ? 'border-emerald-800 bg-emerald-200 text-emerald-800'
-            : 'border-rose-800 bg-rose-200 text-rose-800'
+            ? 'border-[#0f7a6e] bg-[#eef6f5]'
+            : 'border-[#c0185e] bg-[#fbeff4]'
         "
       >
         <div class="flex min-w-0 items-center gap-2">
-          <CheckCircle2
+          <Check
             v-if="store.jobNotice.status === 'succeeded'"
-            class="h-4 w-4 shrink-0 text-emerald-800"
+            class="h-4 w-4 shrink-0 text-foreground"
           />
-          <AlertCircle v-else class="h-4 w-4 shrink-0 text-destructive text-rose-800" />
-          <span class="truncate">{{ store.jobNotice.message }}</span>
+          <X v-else class="h-4 w-4 shrink-0 text-foreground" />
+          <span class="truncate">'succeeded'</span>
         </div>
         <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
 
       <Teleport to="body">
         <div
-          v-if="store.hasRunningJob"
+          v-if="store.jobNotice"
           class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
         >
           <div class="flex flex-col items-center gap-3">
             <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p>Job is running…</p>
+            <p class="font-bold ">Job is running…</p>
           </div>
         </div>
       </Teleport>
@@ -179,7 +179,7 @@ function handlePopState() {
         >
           <div class="flex flex-col items-center gap-3">
             <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p>Agent is thinking…</p>
+            <p class="font-bold">Agent is thinking…</p>
           </div>
         </div>
       </Teleport>
