@@ -19,6 +19,9 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+
+        white: "var(--white)",
+        
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -47,12 +50,49 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+
+        // ===== UNICHE DESIGN TOKENS =====
+        deep: "hsl(var(--deep))",
+        purple: "hsl(var(--purple))",
+        pink: "hsl(var(--pink))",
+        cyan: "hsl(var(--cyan))",
+
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          alt: "hsl(var(--surface-2))",
+          dark: "hsl(var(--surface-dark))",
+        },
+
+        text: {
+          DEFAULT: "hsl(var(--text-primary))",
+          primary: "hsl(var(--text-primary))",
+          secondary: "hsl(var(--text-secondary))",
+          muted: "hsl(var(--text-muted))",
+          link: "hsl(var(--deep))",
+        },
+
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        error: "hsl(var(--error))",
+        info: "hsl(var(--info))",
       },
+
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        xs: "var(--r-xs)",
+        sm: "var(--r-sm)",
+        md: "var(--r-md)",
+        lg: "var(--r-lg)",
+        xl: "var(--r-xl)",
+        full: "var(--r-pill)",
       },
+      
+      boxShadow: {
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+      },
+      
       fontFamily: {
         sans: ["Montserrat", "ui-sans-serif", "system-ui", "sans-serif"],
       },

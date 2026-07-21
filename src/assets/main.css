@@ -4,43 +4,88 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 94%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 24 10% 10%;
-    --destructive: 0 72% 48%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 86%;
-    --input: 214 32% 86%;
-    --ring: 172 66% 28%;
-    --radius: 0.5rem;
-
     /* Brand */
-    --primary: 269 65% 33%;           /* #4c1d8b */
-    --primary-foreground: 0 0% 100%;
-
-    --pink: 323 93% 59%;              /* #f832a4 */
-    --purple: 280 59% 61%;            /* #b05fd6 */
+    --deep: 264 65% 33%;
+    --purple: 283 59% 61%;
+    --pink: 324 93% 59%;
+    --cyan: 181 97% 58%;
 
     /* Surfaces */
-    --surface: 0 0% 100%;             /* #ffffff */
-    --surface-2: 220 14% 96%;         /* #f3f4f6 */
-    --surface-dark: 222 47% 11%;      /* #111827 */
+    --surface: 0 0% 100%;
+    --surface-2: 220 14% 96%;
+    --surface-dark: 215 28% 17%;
 
     /* Text */
-    --foreground: 222 84% 5%;         /* #030712 */
-    --body: 220 9% 31%;               /* #374151 */
-    --muted-foreground: 220 9% 46%;   /* #6b7280 */
+    --text-primary: 222 47% 11%;
+    --text-secondary: 217 19% 27%;
+    --text-muted: 220 9% 46%;
 
-    --surface-dark-foreground: 0 0% 100%;
-    --surface-dark-muted: 220 13% 82%; /* #d1d5db */
+    /* Borders */
+    --border: 220 13% 91%;
+    --border-2: 220 13% 82%;
+
+    /* Semantic */
+    --success: 173 78% 27%;
+    --warning: 38 100% 30%;
+    --error: 333 82% 42%;
+    --info: 214 56% 40%;
+
+    /* Gradients */
+    --grad-brand: linear-gradient(
+        135deg,
+        #f832a4 0%,
+        #b05fd6 50%,
+        #29f8fd 100%
+    ); /* logo, CTA */
+    --grad-deco: linear-gradient(
+        135deg,
+        #ff80b5 0%,
+        #9089fc 100%
+    ); /* decorative blobs, 40-50% opacity */
+
+    /* Shadows - neutral */
+    --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
+
+    /* Compatibility with shadcn */
+    --background: var(--surface);
+    --foreground: var(--text-primary);
+
+    --primary: var(--deep);
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: var(--surface-2);
+    --secondary-foreground: var(--text-secondary);
+
+    --muted: var(--surface-2);
+    --muted-foreground: var(--text-muted);
+
+    --accent: var(--purple);
+    --accent-foreground: 0 0% 100%;
+
+    --input: var(--border);
+    --ring: var(--purple);
+
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+
+    --popover: var(--surface);
+    --popover-foreground: var(--text-primary);
+
+    --destructive: var(--error);
+    --destructive-foreground: 0 0% 100%;
+
+    --radius: 8px;
+
+    /* Radii */
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 8px;
+    --r-lg: 8px;
+    --r-xl: 12px;
+    --r-pill: 999px;
   }
 
   * {
@@ -48,7 +93,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans text-sm font-normal leading-6 antialiased;
+    @apply bg-background text-primary font-sans text-sm font-normal leading-6 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow: hidden;
   }
@@ -85,7 +130,11 @@
   }
 
   h3 {
-    @apply text-2xl font-semibold;
+    @apply text-2xl font-bold;
+  }
+
+  h4 {
+    @apply text-base font-bold;
   }
 
   p {
@@ -102,12 +151,99 @@
     @apply text-xs leading-5 text-muted-foreground;
   }
 
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-pill);
+    padding: 12px 28px;
+    transition: all 0.18s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
   .btn-primary {
-    @apply bg-primary text-white transition-colors;
+    background: var(--grad-brand);
+    color: white;
+    box-shadow: 0 3px 16px rgba(176, 95, 214, 0.3);
+    text-shadow: 0 1px 3px rgba(76, 29, 139, 0.45);
   }
 
   .btn-primary:hover {
-    background-color: hsl(var(--pink));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(176, 95, 214, 0.4);
+  }
+
+  .btn-secondary {
+    background: hsl(var(--deep));
+    color: white;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .btn-secondary:hover {
+    background: #3a1470;
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: hsl(var(--deep));
+    border: 2px solid hsl(var(--deep));
+  }
+
+  .btn-outline:hover {
+    background: hsl(var(--surface-2));
+  }
+  
+  .btn-muted {
+    background: hsl(var(--surface-2));
+    color: hsl(var(--text-secondary));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .btn-muted:hover {
+    border-color: hsl(var(--purple));
+    color: hsl(var(--purple));
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: hsl(var(--purple));
+    border: 2px solid transparent;
+  }
+
+  .btn-ghost:hover {
+    background: hsl(var(--surface-2));
+  }
+
+  .btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: hsl(var(--text-primary));
+    margin-bottom: 6px;
+  }
+
+  .card-text {
+    font-size: 13px;
+    font-weight: 300;
+    color: hsl(var(--text-secondary));
+    line-height: 1.65;
   }
 }
 
