@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const props = withDefaults(
   defineProps<{
-    variant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
+    variant?: "default" | "secondary" | "outline" | "muted" | "ghost" | "destructive";
     size?: "default" | "sm" | "icon";
     class?: string;
     type?: "button" | "submit" | "reset";
@@ -21,17 +21,17 @@ const props = withDefaults(
 
 const classes = computed(() =>
   cn(
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+    "btn",
     {
-      "bg-primary text-primary-foreground hover:bg-primary/90": props.variant === "default",
-      "bg-secondary text-secondary-foreground hover:bg-secondary/80": props.variant === "secondary",
-      "border border-input bg-background hover:bg-muted": props.variant === "outline",
-      "hover:bg-muted": props.variant === "ghost",
+      "btn-primary": props.variant === "default",
+      "btn-secondary": props.variant === "secondary",
+      "btn-outline": props.variant === "outline",
+      "btn-muted": props.variant === "muted",
+      "btn-ghost": props.variant === "ghost",
       "bg-destructive text-destructive-foreground hover:bg-destructive/90":
         props.variant === "destructive",
-      "h-10 px-4 py-2": props.size === "default",
-      "h-9 px-3": props.size === "sm",
-      "h-9 w-9": props.size === "icon",
+      "px-[18px] py-2 text-[10px]": props.size === "sm",
+      "btn-icon": props.size === "icon",
     },
     props.class,
   ),
