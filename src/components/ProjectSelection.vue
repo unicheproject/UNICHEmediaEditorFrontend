@@ -180,7 +180,7 @@ async function confirmDeleteProject() {
           <p class="text-muted-foreground">Select a project to manage its assets.</p>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="outline" @click="store.loadInitial">
+          <Button variant="muted" @click="store.loadInitial">
             <RefreshCw class="h-4 w-4" />
             Refresh
           </Button>
@@ -206,29 +206,31 @@ async function confirmDeleteProject() {
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <h3 class="line-clamp-2">{{ project.name }}</h3>
-              <p class="mt-2 line-clamp-3 leading-6 text-muted-foreground">
+              <div class="card-title line-clamp-2">{{ project.name }}</div>
+              <div class="card-text line-clamp-3">
                 {{ project.description || "No description" }}
-              </p>
+              </div>
             </div>
             <div class="flex shrink-0 items-center gap-1">
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="icon"
                 title="Edit project"
+                aria-label="Edit project"
                 @click.stop="openEdit(project)"
               >
                 <Edit class="h-4 w-4" />
               </Button>
               <Button
-                variant="ghost"
+                variant="muted"
                 size="icon"
                 title="Delete project"
+                aria-label="Delete project"
                 @click.stop="projectToDelete = project"
               >
                 <Trash2 class="h-4 w-4 text-destructive" />
               </Button>
-              <FolderOpen class="h-5 w-5 text-primary" />
+              <!-- <FolderOpen class="h-5 w-5 text-primary" /> -->
             </div>
           </div>
           <div class="mt-auto border-t pt-4 text-xs text-muted-foreground">

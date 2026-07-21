@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 <template>
   <div ref="menuRoot" class="relative">
     <button
-      class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      class="btn btn-outline"
       :aria-expanded="menuOpen"
       aria-haspopup="menu"
       @click="toggleMenu"
@@ -47,7 +47,7 @@ onBeforeUnmount(() => {
       <span class="max-w-[12rem] truncate">
         {{ profile?.name ?? profile?.email ?? profile?.username ?? "Account" }}
       </span>
-      <ChevronDown class="h-4 w-4 text-muted-foreground" />
+      <ChevronDown class="h-4 w-4" />
     </button>
 
     <div

@@ -186,9 +186,9 @@ async function uploadFiles(event: Event) {
           </Button>
         </div>
         <div class="flex min-h-32 flex-1 flex-col p-3">
-          <h3 class="line-clamp-2" :title="asset.original_filename">
+          <h4 class="line-clamp-2" :title="asset.original_filename">
             {{ asset.original_filename }}
-          </h3>
+          </h4>
           <p class="mt-1 text-xs text-muted-foreground">
             {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
           </p>

@@ -85,7 +85,7 @@ async function confirmDeleteProject() {
   <header class="border-b bg-card">
     <div class="flex min-h-20 flex-wrap items-center justify-between gap-4 px-4 lg:px-6">
       <div class="flex min-w-0 items-center gap-4">
-        <Button variant="outline" size="icon" title="Project selection" @click="$emit('home')">
+        <Button variant="secondary" size="icon" title="Project selection" aria-label="Project selection" @click="$emit('home')">
           <Home class="h-4 w-4" />
           <span class="sr-only">Project selection</span>
         </Button>
