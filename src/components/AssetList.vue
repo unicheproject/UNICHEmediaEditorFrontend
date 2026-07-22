@@ -64,6 +64,7 @@ async function uploadFiles(event: Event) {
         size="icon"
         variant="outline"
         title="Upload asset"
+        aria-label="Upload asset"
         :disabled="!store.selectedProjectId || store.uploading"
         @click="fileInput?.click()"
       >

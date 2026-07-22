@@ -184,6 +184,7 @@ async function uploadFiles(event: Event) {
             variant="outline"
             size="icon"
             title="Play asset"
+            aria-label="Play asset"
             @click.stop="openPlayer(asset)"
           >
             <Play class="h-4 w-4" />
@@ -204,6 +205,7 @@ async function uploadFiles(event: Event) {
                 variant="muted"
                 size="icon"
                 title="Delete asset"
+                aria-label="Delete asset"
                 @click.stop="assetToDelete = asset"
               >
                 <Trash2 class="h-4 w-4 text-destructive" />
@@ -213,6 +215,7 @@ async function uploadFiles(event: Event) {
                 variant="secondary"
                 size="icon"
                 title="Download asset"
+                aria-label="Download asset"
                 @click.stop="downloadAsset(asset)"
               >
                 <Download class="h-4 w-4" />

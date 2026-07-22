@@ -323,6 +323,7 @@ async function exportTimeline() {
             variant="ghost"
             size="icon"
             title="Download composition"
+            aria-label="Download composition"
             @click="downloadAsset(exportedComposition)"
           >
             <Download class="h-4 w-4" />

@@ -281,7 +281,13 @@ function submit() {
             <button class="text-sm font-medium" type="button" @click="seek(marker)">
               {{ formatTime(marker) }}
             </button>
-            <Button variant="ghost" size="icon" title="Remove marker" @click="removeMarker(marker)">
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Remove marker"
+              aria-label="Remove marker"
+              @click="removeMarker(marker)"
+            >
               <Trash2 class="h-4 w-4 text-destructive" />
             </Button>
           </div>

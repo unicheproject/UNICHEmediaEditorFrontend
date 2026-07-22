@@ -42,7 +42,12 @@ const emit = defineEmits<{
               {{ description }}
             </p>
           </div>
-          <Button variant="ghost" size="icon" @click="emit('close')">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Close"
+            @click="emit('close')"
+          >
             <X class="h-4 w-4" />
             <span class="sr-only">Close</span>
           </Button>
