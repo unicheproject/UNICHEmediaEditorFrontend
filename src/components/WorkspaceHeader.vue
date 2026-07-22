@@ -82,8 +82,8 @@ async function confirmDeleteProject() {
 </script>
 
 <template>
-  <header class="border-b bg-card">
-    <div class="flex min-h-20 flex-wrap items-center justify-between gap-4 px-4 lg:px-6">
+  <header class="border-b bg-card shadow-xs">
+    <div class="flex min-h-16 flex-wrap items-center justify-between gap-4 px-4 lg:px-6">
       <div class="flex min-w-0 items-center gap-4">
         <Button variant="secondary" size="icon" title="Project selection" aria-label="Project selection" @click="$emit('home')">
           <Home class="h-4 w-4" />
@@ -105,9 +105,9 @@ async function confirmDeleteProject() {
                 background-clip: text;
               ">U</span>NICHE Media Editor
             </div>
-            <Badge variant="featured">Project workspace</Badge>
+            <Badge variant="outline">Project workspace</Badge>
           </div>
-          <p class="mt-1 truncate text-muted-foreground font-bold">
+          <p class="truncate text-muted-foreground font-bold">
             {{ store.selectedProject?.name ?? "No project selected" }}
           </p>
         </div>
