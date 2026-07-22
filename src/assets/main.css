@@ -265,4 +265,8 @@
       #9089fc 100%
     );
   }
+
+  .border-accent-top {
+    border-top: 3px solid hsl(var(--purple));
+  }
 }

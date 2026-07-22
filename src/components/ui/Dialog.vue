@@ -45,6 +45,7 @@ const emit = defineEmits<{
           <Button
             variant="ghost"
             size="icon"
+            title="Close"
             aria-label="Close"
             @click="emit('close')"
           >

@@ -105,7 +105,7 @@ async function confirmDeleteProject() {
                 background-clip: text;
               ">U</span>NICHE Media Editor
             </div>
-            <Badge variant="secondary">Project workspace</Badge>
+            <Badge variant="featured">Project workspace</Badge>
           </div>
           <p class="mt-1 truncate text-muted-foreground font-bold">
             {{ store.selectedProject?.name ?? "No project selected" }}

@@ -56,7 +56,6 @@ const audioDuration = computed(() => (audioBed.value ? durationFor(audioBed.valu
 const totalDuration = computed(() =>
   Math.max(videoDuration.value, audioDuration.value, secondsPerFallbackClip),
 );
-const timelineWidth = computed(() => Math.max(760, Math.ceil(totalDuration.value * pixelsPerSecond)));
 
 watch(
   () => store.selectedProjectId,

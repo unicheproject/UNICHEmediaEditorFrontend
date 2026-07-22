@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const props = withDefaults(
   defineProps<{
-    variant?: "default" | "secondary" | "outline" | "success" | "warning";
+    variant?: "featured" | "default" | "secondary" | "outline" | "neutral" | "success" | "warning" | "error";
     class?: string;
   }>(),
   { variant: "default" },
@@ -13,13 +13,16 @@ const props = withDefaults(
 
 const classes = computed(() =>
   cn(
-    "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
+    "inline-flex items-center rounded-full px-3 py-2 text-[10px] font-bold tracking-[0.07em] leading-none",
     {
-      "bg-primary text-primary-foreground": props.variant === "default",
+      "bg-brand-gradient text-white": props.variant === "featured",
+      "bg-primary text-white": props.variant === "default",
       "bg-secondary text-secondary-foreground": props.variant === "secondary",
-      "border border-border bg-background": props.variant === "outline",
-      "bg-emerald-100 text-emerald-800": props.variant === "success",
-      "bg-amber-100 text-amber-900": props.variant === "warning",
+      "border border-deep bg-[#4c1d8b0f] text-deep": props.variant === "outline",
+      "border bg-surface-2 text-text-secondary": props.variant === "neutral",
+      "bg-[#0f7a6e1a] text-success": props.variant === "success",
+      "bg-[#9a62001a] text-warning": props.variant === "warning",
+      "bg-[#c0185e1a] text-error": props.variant === "error",
     },
     props.class,
   ),

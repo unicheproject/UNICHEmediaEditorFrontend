@@ -171,7 +171,7 @@ async function submitAction(params: Record<string, unknown>) {
 </script>
 
 <template>
-  <Card class="flex min-h-0 flex-col p-4">
+  <Card class="flex min-h-0 flex-col p-4 border-accent-top">
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
         <h4>Actions</h4>

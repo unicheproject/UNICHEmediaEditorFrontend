@@ -15,7 +15,7 @@ function statusVariant(status: JobStatus) {
     return "success";
   }
   if (status === "failed" || status === "cancelled") {
-    return "warning";
+    return "error";
   }
   return "secondary";
 }
@@ -37,7 +37,7 @@ function outputSummary(job: Job) {
 </script>
 
 <template>
-  <Card class="flex min-h-0 flex-col p-4">
+  <Card class="flex min-h-0 flex-col p-4 border-accent-top">
     <div class="mb-3">
       <h4>Jobs</h4>
       <p class="text-muted-foreground text-xs">Latest project activity</p>
@@ -47,7 +47,7 @@ function outputSummary(job: Job) {
       <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <p class="truncate font-bold">{{ job.capability_id }}</p>
+            <p class="truncate font-bold text-sm">{{ job.capability_id }}</p>
             <p class="mt-1 text-muted-foreground text-xs">{{ outputSummary(job) }}</p>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">

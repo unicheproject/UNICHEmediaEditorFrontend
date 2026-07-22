@@ -169,12 +169,17 @@ async function uploadFiles(event: Event) {
             v-else
             class="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-muted-foreground"
           />
-          <Badge class="absolute left-2 top-2" variant="secondary">
+          <Badge class="absolute left-2 top-2 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
             {{ mediaLabel(asset.media_type) }}
           </Badge>
           <Badge
-            class="absolute bottom-2 left-2"
+            class="absolute bottom-2 left-2 bg-[#e7f1f0]"
             :variant="asset.source_asset_id ? 'success' : 'outline'"
+            :class="
+              asset.source_asset_id
+                ? 'bg-[#e7f1f0]'
+                : 'bg-[#f3f4f6]'
+            "
           >
             {{ asset.source_asset_id ? "Derived" : "Original" }}
           </Badge>
