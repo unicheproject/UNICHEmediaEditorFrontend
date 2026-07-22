@@ -28,7 +28,7 @@ const emit = defineEmits<{
       <div
         :class="
           cn(
-            'fixed left-1/2 top-1/2 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg',
+            'fixed left-1/2 top-1/2 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover p-6 text-popover-foreground shadow-lg',
             $props.class,
           )
         "
@@ -36,14 +36,14 @@ const emit = defineEmits<{
         aria-modal="true"
       >
         <div class="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <h2>{{ title }}</h2>
+          <div class="max-w-[85%]">
+            <div class="text-[18px] font-bold mb-1">{{ title }}</div>
             <p v-if="description" class="mt-1 text-muted-foreground">
               {{ description }}
             </p>
           </div>
           <Button
-            variant="ghost"
+            variant="muted"
             size="icon"
             title="Close"
             aria-label="Close"

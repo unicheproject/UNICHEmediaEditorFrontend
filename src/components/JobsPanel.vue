@@ -61,6 +61,7 @@ function outputSummary(job: Job) {
         <div class="mt-2 h-1 overflow-hidden rounded-full bg-muted">
           <div
             class="h-full rounded-full bg-primary transition-all"
+            :class="{'progress-100': job.progress == 100}"
             :style="{ width: `${job.progress}%` }"
           />
         </div>

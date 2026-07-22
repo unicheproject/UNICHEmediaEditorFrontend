@@ -25,7 +25,7 @@ defineEmits<{
 <template>
   <Dialog :open="open" :title="title" :description="description" @close="$emit('close')">
     <div class="flex justify-end gap-2">
-      <Button variant="outline" :disabled="loading" @click="$emit('close')">Cancel</Button>
+      <Button variant="muted" :disabled="loading" @click="$emit('close')">Cancel</Button>
       <Button variant="destructive" :disabled="loading" @click="$emit('confirm')">
         {{ confirmLabel }}
       </Button>

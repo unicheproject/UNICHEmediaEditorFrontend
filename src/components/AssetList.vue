@@ -51,18 +51,18 @@ async function uploadFiles(event: Event) {
 </script>
 
 <template>
-  <Card class="flex min-h-0 flex-col p-4">
+  <Card class="flex min-h-0 flex-col p-4 border-accent-top">
     <div class="mb-3 flex items-start justify-between gap-3">
-      <div>
-        <h2>Assets</h2>
-        <p class="text-muted-foreground">
+      <div class="max-w-[70%]">
+        <h4>Assets</h4>
+        <p class="text-muted-foreground text-xs">
           {{ sortedAssets.length }} video/audio assets — drag onto the timeline
         </p>
       </div>
       <input ref="fileInput" class="hidden" type="file" multiple @change="uploadFiles" />
       <Button
         size="icon"
-        variant="outline"
+        variant="secondary"
         title="Upload asset"
         aria-label="Upload asset"
         :disabled="!store.selectedProjectId || store.uploading"

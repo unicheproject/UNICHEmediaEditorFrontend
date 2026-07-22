@@ -301,7 +301,7 @@ async function confirmDeleteProject() {
           <Textarea v-model="description" placeholder="Optional project context" />
         </label>
         <div class="flex justify-end gap-2">
-          <Button variant="outline" @click="closeDialog">Cancel</Button>
+          <Button variant="muted" @click="closeDialog">Cancel</Button>
           <Button
             type="submit"
             :disabled="saving || !name.trim() || (!editingProject && (!orgId || !slugValid))"

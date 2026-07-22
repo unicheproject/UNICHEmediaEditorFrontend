@@ -145,11 +145,19 @@
 
 @layer components {
   .field-label {
-    @apply text-sm font-medium text-foreground;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(var(--text-secondary));
   }
 
   .field-hint {
     @apply text-xs leading-5 text-muted-foreground;
+  }
+
+  .progress-100 {
+    background: var(--grad-brand);
   }
 
   .btn {

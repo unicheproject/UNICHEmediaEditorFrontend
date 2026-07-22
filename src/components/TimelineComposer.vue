@@ -205,7 +205,7 @@ async function exportTimeline() {
     <div class="flex flex-wrap items-center justify-between gap-3 border-b py-3 px-4">
       <div>
         <div class="flex flex-wrap items-center gap-2">
-          <h2>Timeline</h2>
+          <h3>Timeline</h3>
           <Badge variant="secondary">Compose / Export</Badge>
         </div>
         <p class="text-muted-foreground">
@@ -213,7 +213,7 @@ async function exportTimeline() {
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <Button variant="outline" size="sm" :disabled="!videoTrack.length && !audioBed" @click="clearTimeline">
+        <Button variant="muted" size="sm" :disabled="!videoTrack.length && !audioBed" @click="clearTimeline">
           Clear
         </Button>
         <Button  size="sm" :disabled="!videoTrack.length || exporting" @click="exportTimeline">

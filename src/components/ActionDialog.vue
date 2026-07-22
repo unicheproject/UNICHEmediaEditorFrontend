@@ -218,7 +218,7 @@ function submit() {
       </p>
 
       <div class="flex justify-end gap-2 border-t pt-4">
-        <Button variant="outline" @click="emit('close')">Cancel</Button>
+        <Button variant="muted" @click="emit('close')">Cancel</Button>
         <Button type="submit">Create job</Button>
       </div>
     </form>

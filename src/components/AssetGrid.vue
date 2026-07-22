@@ -197,14 +197,14 @@ async function uploadFiles(event: Event) {
           </Button>
         </div>
         <div class="flex min-h-32 flex-1 flex-col p-3">
-          <h4 class="line-clamp-2" :title="asset.original_filename">
+          <p class="font-bold line-clamp-2 truncate" :title="asset.original_filename">
             {{ asset.original_filename }}
-          </h4>
+          </p>
           <p class="mt-1 text-xs text-muted-foreground">
             {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
           </p>
           <div class="mt-auto flex items-center justify-between gap-2">
-            <span class="truncate text-xs text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
+            <span class="truncate text-[10px] text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
             <div class="flex items-center gap-1 pb-3">
               <Button
                 variant="muted"
