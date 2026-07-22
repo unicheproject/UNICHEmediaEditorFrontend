@@ -112,7 +112,7 @@ async function uploadFiles(event: Event) {
   <section class="flex min-h-0 flex-col gap-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2>Assets</h2>
+        <h3>Assets</h3>
         <p class="text-muted-foreground">
           {{ store.assets.length }} uploaded or derived assets
         </p>
@@ -120,14 +120,19 @@ async function uploadFiles(event: Event) {
       <div class="flex items-center gap-2">
         <Button
           v-if="store.selectedAssetIds.size"
-          variant="outline"
+          variant="muted"
           size="sm"
           @click="store.clearSelection"
         >
           Clear selection
         </Button>
         <input ref="fileInput" class="hidden" type="file" multiple @change="uploadFiles" />
-        <Button :disabled="!store.selectedProjectId || store.uploading" @click="fileInput?.click()">
+        <Button
+          variant="secondary"
+          size="sm"
+          :disabled="!store.selectedProjectId || store.uploading"
+          @click="fileInput?.click()"
+        >
           <Upload class="h-4 w-4" />
           Upload
         </Button>
@@ -194,9 +199,9 @@ async function uploadFiles(event: Event) {
           </p>
           <div class="mt-auto flex items-center justify-between gap-2">
             <span class="truncate text-xs text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-1 pb-3">
               <Button
-                variant="ghost"
+                variant="muted"
                 size="icon"
                 title="Delete asset"
                 @click.stop="assetToDelete = asset"
@@ -205,7 +210,7 @@ async function uploadFiles(event: Event) {
                 <span class="sr-only">Delete asset</span>
               </Button>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="icon"
                 title="Download asset"
                 @click.stop="downloadAsset(asset)"

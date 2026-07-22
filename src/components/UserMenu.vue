@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 <template>
   <div ref="menuRoot" class="relative">
     <button
-      class="btn btn-outline"
+      class="btn btn-outline px-[18px] py-2 text-[10px]"
       :aria-expanded="menuOpen"
       aria-haspopup="menu"
       @click="toggleMenu"

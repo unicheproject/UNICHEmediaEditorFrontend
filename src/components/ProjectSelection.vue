@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Edit, FolderOpen, FolderPlus, RefreshCw, Trash2 } from "lucide-vue-next";
+import { Edit, FolderPlus, RefreshCw, Trash2 } from "lucide-vue-next";
 import { computed, onMounted, ref, watch } from "vue";
 
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
@@ -176,15 +176,28 @@ async function confirmDeleteProject() {
     <header class="border-b bg-card">
       <div class="container flex min-h-20 items-center justify-between gap-4">
         <div>
-          <h2>UNICHE Media Editor</h2>
+          <div style="
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-right: auto;
+            color: var(--deep);
+          ">
+            <span style="
+              background: var(--grad-brand);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            ">U</span>NICHE Media Editor
+          </div>
           <p class="text-muted-foreground">Select a project to manage its assets.</p>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="muted" @click="store.loadInitial">
+          <Button variant="muted" size="sm" @click="store.loadInitial">
             <RefreshCw class="h-4 w-4" />
             Refresh
           </Button>
-          <Button v-if="canCreate" @click="openCreate">
+          <Button v-if="canCreate" size="sm" @click="openCreate">
             <FolderPlus class="h-4 w-4" />
             New project
           </Button>
@@ -242,7 +255,7 @@ async function confirmDeleteProject() {
       <Card v-else class="flex min-h-96 items-center justify-center border-dashed p-8 text-center">
         <div class="max-w-sm">
           <FolderPlus class="mx-auto h-10 w-10 text-muted-foreground" />
-          <h2>No projects yet</h2>
+          <h2 class="mt-3">No projects yet</h2>
           <template v-if="canCreate">
             <p class="mt-1 text-muted-foreground">
               Create a project before uploading and processing media assets.

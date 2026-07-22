@@ -91,10 +91,23 @@ async function confirmDeleteProject() {
         </Button>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <h2>UNICHE Media Editor</h2>
+            <div style="
+              font-size: 16px;
+              font-weight: 800;
+              letter-spacing: 0.08em;
+              margin-right: auto;
+              color: var(--deep);
+            ">
+              <span style="
+                background: var(--grad-brand);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+              ">U</span>NICHE Media Editor
+            </div>
             <Badge variant="secondary">Project workspace</Badge>
           </div>
-          <p class="mt-1 truncate text-muted-foreground">
+          <p class="mt-1 truncate text-muted-foreground font-bold">
             {{ store.selectedProject?.name ?? "No project selected" }}
           </p>
         </div>
@@ -109,18 +122,20 @@ async function confirmDeleteProject() {
         </Badge>
         <Button
           variant="outline"
+          size="sm"
           :disabled="!store.selectedProjectId"
           @click="store.loadProjectData()"
         >
           <RefreshCw class="h-4 w-4" />
           Refresh
         </Button>
-        <Button :disabled="!store.selectedProject" @click="openEdit">
+        <Button size="sm" variant="secondary" :disabled="!store.selectedProject" @click="openEdit">
           <Edit class="h-4 w-4" />
           Edit project
         </Button>
         <Button
-          variant="destructive"
+          variant="muted"
+          size="sm"
           :disabled="!store.selectedProject"
           @click="confirmDeleteOpen = true"
         >

@@ -174,8 +174,8 @@ async function submitAction(params: Record<string, unknown>) {
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
-        <h3>Actions</h3>
-        <p class="text-muted-foreground">
+        <h4>Actions</h4>
+        <p class="text-muted-foreground text-xs">
           {{ store.selectedAssets.length }} selected
         </p>
       </div>
@@ -193,9 +193,9 @@ async function submitAction(params: Record<string, unknown>) {
     <div v-else class="space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
       <section v-for="[group, actions] in groupedActions" :key="group" class="space-y-2">
         <div class="flex items-center justify-between gap-2">
-          <h3 class="uppercase tracking-wide text-muted-foreground">
+          <p class="uppercase tracking-wide text-muted-foreground font-bold text-xs">
             {{ group }}
-          </h3>
+          </p>
           <div class="h-px flex-1 bg-border" />
         </div>
 

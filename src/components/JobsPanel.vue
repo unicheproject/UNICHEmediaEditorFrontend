@@ -39,16 +39,16 @@ function outputSummary(job: Job) {
 <template>
   <Card class="flex min-h-0 flex-col p-4">
     <div class="mb-3">
-      <h3>Jobs</h3>
-      <p class="text-muted-foreground">Latest project activity</p>
+      <h4>Jobs</h4>
+      <p class="text-muted-foreground text-xs">Latest project activity</p>
     </div>
 
     <div v-if="jobs.length" class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
       <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <h3 class="truncate">{{ job.capability_id }}</h3>
-            <p class="mt-1 text-muted-foreground">{{ outputSummary(job) }}</p>
+            <p class="truncate font-bold">{{ job.capability_id }}</p>
+            <p class="mt-1 text-muted-foreground text-xs">{{ outputSummary(job) }}</p>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
             <div

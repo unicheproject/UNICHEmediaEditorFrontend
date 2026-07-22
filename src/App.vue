@@ -190,24 +190,24 @@ function handlePopState() {
         <WorkspaceHeader @home="goHome" @project-deleted="goHome" />
 
         <main class="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
-          <div class="flex items-center gap-1 rounded-lg bg-muted p-1 self-start">
+          <div class="flex items-center gap-1 rounded-full bg-muted p-1 self-start">
             <button
-              class="rounded-md px-4 py-1.5 transition-colors"
+              class="rounded-full px-4 py-2 text-[11px] font-bold uppercase leading-none"
               :class="
                 activeTab === 'assets'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-deep text-white shadow-xs'
+                  : 'text-muted-foreground'
               "
               @click="activeTab = 'assets'"
             >
               Assets
             </button>
             <button
-              class="rounded-md px-4 py-1.5 transition-colors"
+              class="rounded-full px-4 py-2 text-[11px] font-bold uppercase leading-none"
               :class="
                 activeTab === 'timeline'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-deep text-white shadow-xs'
+                  : 'text-muted-foreground'
               "
               @click="activeTab = 'timeline'"
             >
