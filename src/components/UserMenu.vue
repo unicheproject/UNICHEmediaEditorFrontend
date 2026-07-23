@@ -2,6 +2,7 @@
 import { ChevronDown, LogOut, User } from "lucide-vue-next";
 import { storeToRefs } from "pinia";
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import Button from "@/components/ui/Button.vue";
 
 import { useAuthStore } from "@/stores/auth";
 
@@ -53,22 +54,27 @@ onBeforeUnmount(() => {
     <div
       v-if="menuOpen"
       role="menu"
-      class="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-background p-1 shadow-md"
+      class="absolute right-0 z-50 mt-2 w-64 rounded-md border bg-background p-3 shadow-sm text-center"
     >
-      <div class="border-b px-3 py-2">
-        <p class="truncate">
+      <div class="border-b pb-3">
+        <p class="font-bold truncate">
           {{ profile?.name ?? profile?.username ?? "—" }}
         </p>
         <p class="truncate text-xs text-muted-foreground">{{ profile?.email ?? "—" }}</p>
       </div>
-      <button
+      <Button role="menuitem" variant="default" class="mt-3" @click="authStore.logout()">
+        <LogOut class="h-4 w-4" />
+        Sign out
+      </Button>
+
+      <!-- <button
         role="menuitem"
         class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-secondary"
         @click="authStore.logout()"
       >
         <LogOut class="h-4 w-4" />
         Sign out
-      </button>
+      </button> -->
     </div>
   </div>
 </template>

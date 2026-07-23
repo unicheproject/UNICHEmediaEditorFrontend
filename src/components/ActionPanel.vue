@@ -228,9 +228,9 @@ async function submitAction(params: Record<string, unknown>) {
       role="tooltip"
     >
       <div class="mb-2 flex flex-wrap items-center gap-2">
-        <p>{{ hoveredAction.title }}</p>
-        <Badge v-if="isAgentAction(hoveredAction)" variant="secondary">Chat</Badge>
-        <Badge v-else variant="secondary">{{ costLabel(hoveredAction.cost_class) }}</Badge>
+        <p class="font-bold">{{ hoveredAction.title }}</p>
+        <Badge v-if="isAgentAction(hoveredAction)" variant="featured">Chat</Badge>
+        <Badge v-else variant="default">{{ costLabel(hoveredAction.cost_class) }}</Badge>
         <Badge
           v-if="!isAgentAction(hoveredAction) && hasAssetIdsInput(hoveredAction)"
           variant="outline"
@@ -238,10 +238,10 @@ async function submitAction(params: Record<string, unknown>) {
           Multi
         </Badge>
       </div>
-      <p class="leading-5 text-muted-foreground">
+      <p class="leading-5 text-muted-foreground text-xs">
         {{ hoveredAction.description }}
       </p>
-      <p v-if="!isAgentAction(hoveredAction)" class="mt-2 text-muted-foreground">
+      <p v-if="!isAgentAction(hoveredAction)" class="border-t border-border mt-2 text-muted-foreground text-[10px]">
         {{ hoveredAction.supported_media_types.join(", ") }}
       </p>
     </div>

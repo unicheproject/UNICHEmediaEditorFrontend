@@ -47,18 +47,18 @@ function outputSummary(job: Job) {
       <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
-            <p class="truncate font-bold text-sm">{{ job.capability_id }}</p>
-            <p class="mt-1 text-muted-foreground text-xs">{{ outputSummary(job) }}</p>
+            <p class="truncate font-bold text-xs">{{ job.capability_id }}</p>
+            <p class="text-muted-foreground text-[10px]">{{ outputSummary(job) }}</p>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
             <div
               v-if="isActive(job.status)"
               class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-primary"
             />
-            <Badge :variant="statusVariant(job.status)">{{ job.status }}</Badge>
+            <Badge :variant="statusVariant(job.status)" class="py-1 px-2">{{ job.status }}</Badge>
           </div>
         </div>
-        <div class="mt-2 h-1 overflow-hidden rounded-full bg-muted">
+        <div class="h-1 overflow-hidden rounded-full bg-muted">
           <div
             class="h-full rounded-full bg-primary transition-all"
             :class="{'progress-100': job.progress == 100}"
