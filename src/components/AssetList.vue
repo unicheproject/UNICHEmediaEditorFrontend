@@ -91,7 +91,7 @@ async function uploadFiles(event: Event) {
           class="h-4 w-4 shrink-0 text-muted-foreground"
         />
         <span class="min-w-0 flex-1 truncate">{{ asset.original_filename }}</span>
-        <Badge variant="secondary" class="shrink-0">{{ asset.media_type }}</Badge>
+        <Badge variant="secondary" class="shrink-0 text-[#7b3fc4] bg-[#f5ecfa]">{{ asset.media_type }}</Badge>
       </div>
     </div>
 

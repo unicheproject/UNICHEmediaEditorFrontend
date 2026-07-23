@@ -254,6 +254,87 @@
     color: hsl(var(--text-secondary));
     line-height: 1.65;
   }
+
+  .form-input {
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    color: hsl(var(--text-primary));
+    background: white;
+    border: 1.5px solid hsl(var(--border));
+    border-radius: var(--r-sm);
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+
+  .form-select {
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    color: var(--text-primary);
+    background: white;
+    border: 1.5px solid hsl(var(--border));
+    border-radius: var(--r-sm);
+    padding: 11px 38px 11px 14px;
+    outline: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .select-wrap {
+    position: relative;
+  }
+
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid hsl(var(--text-muted));
+    pointer-events: none;
+  }
+
+  .form-textarea {
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    color: hsl(var(--text-primary));
+    background: white;
+    border: 1.5px solid hsl(var(--border));
+    border-radius: var(--r-sm);
+    padding: 11px 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 96px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: hsl(var(--purple));
+    box-shadow: 0 0 0 3px rgba(176, 95, 214, 0.12);
+  }
+
+  .form-input:focus:not(:focus-visible), .form-select:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .form-input:focus-visible, .form-select:focus-visible, .form-textarea:focus-visible {
+    outline: 2px solid hsl(var(--deep));
+    outline-offset: 3px;
+  }
 }
 
 @layer utilities {

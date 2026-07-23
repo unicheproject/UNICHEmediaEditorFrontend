@@ -301,7 +301,7 @@ async function exportTimeline() {
                   <Trash2 class="h-4 w-4 text-destructive" />
                 </button>
               </div>
-              <p v-else class="ttext-muted-foreground">
+              <p v-else class="text-muted-foreground">
                 Drop an audio asset here.
               </p>
             </div>
