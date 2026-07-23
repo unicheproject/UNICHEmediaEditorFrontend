@@ -113,9 +113,18 @@ async function uploadFiles(event: Event) {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h3>Assets</h3>
-        <p class="text-muted-foreground">
+        <div class="flex flex-wrap items-center gap-2">
+          <Badge v-if="store.selectedProject" variant="outline">
+            {{ store.assets.length }} assets
+          </Badge>
+          <Badge v-if="store.selectedAssetIds.size" variant="outline">
+            {{ store.selectedAssetIds.size }} selected
+          </Badge>
+        </div>
+        
+        <!-- <p class="text-muted-foreground">
           {{ store.assets.length }} uploaded or derived assets
-        </p>
+        </p> -->
       </div>
       <div class="flex items-center gap-2">
         <Button

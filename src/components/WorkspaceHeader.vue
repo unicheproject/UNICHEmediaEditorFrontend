@@ -114,12 +114,6 @@ async function confirmDeleteProject() {
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <Badge v-if="store.selectedProject" variant="outline">
-          {{ store.assets.length }} assets
-        </Badge>
-        <Badge v-if="store.selectedAssetIds.size" variant="outline">
-          {{ store.selectedAssetIds.size }} selected
-        </Badge>
         <Button
           variant="outline"
           size="sm"
@@ -140,7 +134,7 @@ async function confirmDeleteProject() {
           @click="confirmDeleteOpen = true"
         >
           <Trash2 class="h-4 w-4" />
-          Delete
+          Delete Project
         </Button>
         <UserMenu />
       </div>
