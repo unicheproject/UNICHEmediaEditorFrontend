@@ -162,7 +162,7 @@ function handlePopState() {
 
       <Teleport to="body">
         <div
-          v-if="store.jobNotice"
+          v-if="store.hasRunningJob"
           class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
         >
           <div class="flex flex-col items-center gap-3">

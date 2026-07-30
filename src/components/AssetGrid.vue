@@ -157,7 +157,7 @@ async function uploadFiles(event: Event) {
         :key="asset.id"
         :class="
           cn(
-            'group flex h-[300px] cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
+            'group flex h-[350px] cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
             isSelected(asset) && 'border-primary ring-2 ring-primary/20',
           )
         "
