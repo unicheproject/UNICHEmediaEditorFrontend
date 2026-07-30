@@ -4,3 +4,10 @@ dist-ssr
 *.local
 .DS_Store
 *.tsbuildinfo
+
+#Firebase
+.firebase/
+.firebaserc
+firebase.json
+firebase-debug.log
+firebase-debug.*.log
