@@ -33,7 +33,15 @@ import {
 
 import type { Capability, CostClass } from "@/types/api";
 
-export type ActionGroup = "Compose" | "Video" | "Image" | "Audio" | "AI" | "Agent" | "Other";
+export type ActionGroup =
+  | "Generate"
+  | "Compose"
+  | "Video"
+  | "Image"
+  | "Audio"
+  | "AI"
+  | "Agent"
+  | "Other";
 
 interface Presentation {
   group: ActionGroup;
@@ -42,7 +50,9 @@ interface Presentation {
 }
 
 const byId: Record<string, Presentation> = {
-  "media.titlecard": { group: "Compose", icon: Type, order: 10 },
+  "media.titlecard": { group: "Generate", icon: Type, order: 10 },
+  "audio.tts": { group: "Generate", icon: Speech, order: 20 },
+
   "image.slideshow": { group: "Compose", icon: Layers, order: 20 },
   "video.compose": { group: "Compose", icon: ListVideo, order: 30 },
   "video.subtitle.embed": { group: "Compose", icon: Subtitles, order: 40 },
@@ -72,7 +82,6 @@ const byId: Record<string, Presentation> = {
 
   "audio.transcribe": { group: "Audio", icon: Mic, order: 510 },
   "subtitle.autogenerate": { group: "Audio", icon: Subtitles, order: 520 },
-  "audio.tts": { group: "Audio", icon: Speech, order: 530 },
   "audio.music.generate": { group: "Audio", icon: Music, order: 540 },
   "audio.denoise": { group: "Audio", icon: AudioWaveform, order: 550 },
   "audio.separate.stems": { group: "Audio", icon: Split, order: 560 },
@@ -85,13 +94,14 @@ const byId: Record<string, Presentation> = {
 };
 
 const groupOrder: Record<ActionGroup, number> = {
-  Compose: 0,
-  Video: 1,
-  Image: 2,
-  Audio: 3,
-  AI: 4,
-  Agent: 5,
-  Other: 6,
+  Generate: 0,
+  Compose: 1,
+  Video: 2,
+  Image: 3,
+  Audio: 4,
+  AI: 5,
+  Agent: 6,
+  Other: 7,
 };
 
 function fallbackGroup(capability: Capability): ActionGroup {

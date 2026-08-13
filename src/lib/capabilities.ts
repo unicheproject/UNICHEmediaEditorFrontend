@@ -26,6 +26,14 @@ export function hasAssetIdsInput(capability: Capability) {
   return capability.input_schema.properties?.asset_ids?.type === "array";
 }
 
+// Capabilities that generate new media from scratch (text, params) rather than
+// operating on a selected asset. These stay visible with no assets selected.
+const STANDALONE_CAPABILITY_IDS = new Set(["audio.tts", "media.titlecard"]);
+
+export function isStandaloneCapability(capability: Capability) {
+  return STANDALONE_CAPABILITY_IDS.has(capability.id);
+}
+
 export function inputProperties(capability: Capability) {
   return capability.input_schema.properties ?? {};
 }
@@ -37,7 +45,15 @@ export function visibleInputProperties(capability: Capability) {
 }
 
 export function supportsSelection(capability: Capability, assets: Asset[]) {
-  if (!capability.enabled || assets.length === 0) {
+  if (!capability.enabled) {
+    return false;
+  }
+
+  if (isStandaloneCapability(capability)) {
+    return true;
+  }
+
+  if (assets.length === 0) {
     return false;
   }
 
@@ -218,7 +234,7 @@ const FIELD_META: Record<string, FieldMeta> = {
     min: 0,
     max: 200,
   },
-  "image.upscale": {
+  "image.upscale.scale": {
     hint: "Allowed range: 2–4 (default: 4)",
     min: 2,
     max: 4,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Edit, Home, RefreshCw, Trash2 } from "lucide-vue-next";
-import { ref, watch } from "vue";
+import { Edit, Home, MoreVertical, RefreshCw, Trash2 } from "lucide-vue-next";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Badge from "@/components/ui/Badge.vue";
@@ -23,6 +23,41 @@ const description = ref("");
 const saving = ref(false);
 const confirmDeleteOpen = ref(false);
 const deleting = ref(false);
+const projectMenuOpen = ref(false);
+const projectMenuRoot = ref<HTMLElement | null>(null);
+
+function onDocumentClick(event: MouseEvent) {
+  if (projectMenuRoot.value && !projectMenuRoot.value.contains(event.target as Node)) {
+    projectMenuOpen.value = false;
+  }
+}
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape") projectMenuOpen.value = false;
+}
+
+onMounted(() => {
+  document.addEventListener("click", onDocumentClick);
+  document.addEventListener("keydown", onKeydown);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("click", onDocumentClick);
+  document.removeEventListener("keydown", onKeydown);
+});
+
+function handleRefresh() {
+  projectMenuOpen.value = false;
+  store.loadProjectData();
+}
+
+function handleEditClick() {
+  projectMenuOpen.value = false;
+  openEdit();
+}
+
+function handleDeleteClick() {
+  projectMenuOpen.value = false;
+  confirmDeleteOpen.value = true;
+}
 
 watch(
   () => store.selectedProject,
@@ -114,29 +149,58 @@ async function confirmDeleteProject() {
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!store.selectedProjectId"
-          @click="store.loadProjectData()"
-        >
-          <RefreshCw class="h-4 w-4" />
-          Refresh
-        </Button>
-        <Button size="sm" variant="secondary" :disabled="!store.selectedProject" @click="openEdit">
-          <Edit class="h-4 w-4" />
-          Edit project
-        </Button>
-        <Button
-          variant="muted"
-          size="sm"
-          :disabled="!store.selectedProject"
-          @click="confirmDeleteOpen = true"
-        >
-          <Trash2 class="h-4 w-4" />
-          Delete Project
-        </Button>
         <UserMenu />
+
+        <div ref="projectMenuRoot" class="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            aria-haspopup="menu"
+            :aria-expanded="projectMenuOpen"
+            title="Project actions"
+            aria-label="Project actions"
+            @click="projectMenuOpen = !projectMenuOpen"
+          >
+            <MoreVertical class="h-4 w-4" />
+          </Button>
+
+          <div
+            v-if="projectMenuOpen"
+            role="menu"
+            class="absolute right-0 z-50 mt-2 w-56 space-y-1 rounded-md border bg-background p-2 shadow-sm"
+          >
+            <button
+              role="menuitem"
+              type="button"
+              class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!store.selectedProjectId"
+              @click="handleRefresh"
+            >
+              <RefreshCw class="h-4 w-4" />
+              Refresh
+            </button>
+            <button
+              role="menuitem"
+              type="button"
+              class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!store.selectedProject"
+              @click="handleEditClick"
+            >
+              <Edit class="h-4 w-4" />
+              Edit project
+            </button>
+            <button
+              role="menuitem"
+              type="button"
+              class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-destructive hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!store.selectedProject"
+              @click="handleDeleteClick"
+            >
+              <Trash2 class="h-4 w-4" />
+              Delete project
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>

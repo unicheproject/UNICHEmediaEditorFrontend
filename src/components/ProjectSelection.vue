@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Edit, FolderPlus, RefreshCw, Trash2 } from "lucide-vue-next";
-import { computed, onMounted, ref, watch } from "vue";
+import { Edit, FolderPlus, MoreVertical, RefreshCw, Trash2 } from "lucide-vue-next";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Button from "@/components/ui/Button.vue";
@@ -35,6 +35,36 @@ const orgId = ref("");
 const orgs = ref<Organisation[]>([]);
 const saving = ref(false);
 const deleting = ref(false);
+const projectsMenuOpen = ref(false);
+const projectsMenuRoot = ref<HTMLElement | null>(null);
+
+function onDocumentClick(event: MouseEvent) {
+  if (projectsMenuRoot.value && !projectsMenuRoot.value.contains(event.target as Node)) {
+    projectsMenuOpen.value = false;
+  }
+}
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape") projectsMenuOpen.value = false;
+}
+
+onMounted(() => {
+  document.addEventListener("click", onDocumentClick);
+  document.addEventListener("keydown", onKeydown);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("click", onDocumentClick);
+  document.removeEventListener("keydown", onKeydown);
+});
+
+function handleRefreshClick() {
+  projectsMenuOpen.value = false;
+  store.loadInitial();
+}
+
+function handleNewProjectClick() {
+  projectsMenuOpen.value = false;
+  openCreate();
+}
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,62}$/;
 const slugValid = computed(() => SLUG_RE.test(slug.value));
@@ -173,8 +203,8 @@ async function confirmDeleteProject() {
 
 <template>
   <section class="min-h-screen">
-    <header class="border-b bg-card">
-      <div class="container flex min-h-20 items-center justify-between gap-4">
+    <header class="border-b bg-card shadow-xs">
+      <div class="flex min-h-16 flex-wrap items-center justify-between gap-4 px-4 lg:px-6">
         <div>
           <div style="
             font-size: 16px;
@@ -193,15 +223,47 @@ async function confirmDeleteProject() {
           <p class="text-muted-foreground">Select a project to manage its assets.</p>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="muted" size="sm" @click="store.loadInitial">
-            <RefreshCw class="h-4 w-4" />
-            Refresh
-          </Button>
-          <Button v-if="canCreate" size="sm" @click="openCreate">
-            <FolderPlus class="h-4 w-4" />
-            New project
-          </Button>
           <UserMenu />
+
+          <div ref="projectsMenuRoot" class="relative">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-haspopup="menu"
+              :aria-expanded="projectsMenuOpen"
+              title="Project list actions"
+              aria-label="Project list actions"
+              @click="projectsMenuOpen = !projectsMenuOpen"
+            >
+              <MoreVertical class="h-4 w-4" />
+            </Button>
+
+            <div
+              v-if="projectsMenuOpen"
+              role="menu"
+              class="absolute right-0 z-50 mt-2 w-56 space-y-1 rounded-md border bg-background p-2 shadow-sm"
+            >
+              <button
+                role="menuitem"
+                type="button"
+                class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-secondary"
+                @click="handleRefreshClick"
+              >
+                <RefreshCw class="h-4 w-4" />
+                Refresh
+              </button>
+              <button
+                v-if="canCreate"
+                role="menuitem"
+                type="button"
+                class="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-secondary"
+                @click="handleNewProjectClick"
+              >
+                <FolderPlus class="h-4 w-4" />
+                New project
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
