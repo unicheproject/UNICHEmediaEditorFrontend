@@ -221,22 +221,23 @@ async function submitAction(params: Record<string, unknown>) {
           <div class="h-px flex-1 bg-border" />
         </div>
 
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(36px,1fr))] gap-2">
-          <div v-for="action in actions" :key="action.id">
-            <button
-              class="flex aspect-square w-full items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              type="button"
-              :aria-label="action.title"
-              :disabled="!isAgentAction(action) && creating"
-              @blur="hideTooltip"
-              @click="openAction(action)"
-              @focus="showTooltip(action, $event)"
-              @mouseenter="showTooltip(action, $event)"
-              @mouseleave="hideTooltip"
-            >
-              <component :is="iconFor(action)" class="h-5 w-5" />
-            </button>
-          </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="action in actions"
+            :key="action.id"
+            class="flex items-center gap-1.5 rounded-[999px] border bg-background px-3 py-1.5 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            type="button"
+            :aria-label="action.title"
+            :disabled="!isAgentAction(action) && creating"
+            @blur="hideTooltip"
+            @click="openAction(action)"
+            @focus="showTooltip(action, $event)"
+            @mouseenter="showTooltip(action, $event)"
+            @mouseleave="hideTooltip"
+          >
+            <component :is="iconFor(action)" class="h-4 w-4 shrink-0" />
+            <span class="whitespace-nowrap text-xs">{{ action.title }}</span>
+          </button>
         </div>
       </section>
     </div>

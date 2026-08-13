@@ -160,7 +160,7 @@ function handlePopState() {
         <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
 
-      <Teleport to="body">
+      <!-- <Teleport to="body">
         <div
           v-if="store.hasRunningJob"
           class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
@@ -170,7 +170,7 @@ function handlePopState() {
             <p class="font-bold ">Job is running…</p>
           </div>
         </div>
-      </Teleport>
+      </Teleport> -->
 
       <Teleport to="body">
         <div
