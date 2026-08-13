@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 
 import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
@@ -18,12 +18,15 @@ import {
   requiredFields,
   visibleInputProperties,
 } from "@/lib/capabilities";
-import { useWorkspaceStore } from "@/stores/workspace";
+import { TRANSCRIPT_EXPORT_FORMATS, transcriptExportFile, type TranscriptExportFormat } from "@/lib/transcriptExport";
+import { useWorkspaceStore, type TranscribeResult } from "@/stores/workspace";
 import type { Asset, Capability, JsonSchemaProperty } from "@/types/api";
 
 const props = defineProps<{
   action: Capability | null;
   open: boolean;
+  transcribing?: boolean;
+  transcriptResult?: TranscribeResult | null;
 }>();
 
 const emit = defineEmits<{
@@ -33,6 +36,43 @@ const emit = defineEmits<{
 
 const store = useWorkspaceStore();
 const values = reactive<Record<string, string>>({});
+const transcriptDraft = ref("");
+const transcriptFormat = ref<TranscriptExportFormat>("txt");
+const savingTranscriptAsset = ref(false);
+
+watch(
+  () => props.transcriptResult,
+  (result) => {
+    transcriptDraft.value = result?.text ?? "";
+  },
+  { immediate: true },
+);
+
+const transcriptSourceAsset = computed(() => {
+  const assetId = props.transcriptResult?.assetId;
+  return assetId ? store.assets.find((asset) => asset.id === assetId) ?? null : null;
+});
+
+async function saveTranscriptAsset() {
+  if (!props.transcriptResult) {
+    return;
+  }
+  savingTranscriptAsset.value = true;
+  try {
+    const base = transcriptSourceAsset.value?.original_filename.replace(/\.[^./]+$/, "") ?? "transcript";
+    const file = transcriptExportFile(
+      `${base}.transcript`,
+      transcriptFormat.value,
+      transcriptDraft.value,
+      props.transcriptResult.segments,
+    );
+    await store.uploadAsset(file);
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to save transcript");
+  } finally {
+    savingTranscriptAsset.value = false;
+  }
+}
 
 const fields = computed(() => (props.action ? visibleInputProperties(props.action) : []));
 const required = computed(() => (props.action ? requiredFields(props.action) : new Set<string>()));
@@ -165,7 +205,41 @@ function submit() {
     class="max-h-[90vh] overflow-auto"
     @close="emit('close')"
   >
-    <form v-if="action" class="space-y-4" @submit.prevent="submit">
+    <div
+      v-if="action?.id === 'audio.transcribe' && transcriptResult != null"
+      class="space-y-4"
+    >
+      <Textarea v-model="transcriptDraft" :rows="12" class="min-h-[260px]" />
+      <div class="flex flex-wrap items-center justify-between gap-2 border-t pt-4">
+        <div class="flex items-center gap-2">
+          <Select v-model="transcriptFormat" class="w-auto">
+            <option v-for="option in TRANSCRIPT_EXPORT_FORMATS" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </Select>
+          <Button
+            variant="muted"
+            :disabled="savingTranscriptAsset"
+            @click="saveTranscriptAsset"
+          >
+            {{ savingTranscriptAsset ? "Saving…" : "Save as" }}
+          </Button>
+        </div>
+        <Button @click="emit('close')">Close</Button>
+      </div>
+    </div>
+
+    <div
+      v-else-if="action?.id === 'audio.transcribe' && transcribing"
+      class="space-y-4"
+    >
+      <p class="rounded-md bg-muted p-3 text-muted-foreground">Transcribing audio…</p>
+      <div class="flex justify-end gap-2 border-t pt-4">
+        <Button variant="muted" @click="emit('close')">Close</Button>
+      </div>
+    </div>
+
+    <form v-else-if="action" class="space-y-4" @submit.prevent="submit">
       <div v-if="fields.length" class="space-y-4">
         <label v-for="[name, property] in fields" :key="name" class="block space-y-2">
           <span class="field-label">

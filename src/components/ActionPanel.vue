@@ -20,7 +20,7 @@ import {
   type ActionOption,
 } from "@/lib/capabilities";
 import { useAgentChatStore } from "@/stores/agentChat";
-import { useWorkspaceStore } from "@/stores/workspace";
+import { useWorkspaceStore, type TranscribeResult } from "@/stores/workspace";
 import type { Capability } from "@/types/api";
 
 const store = useWorkspaceStore();
@@ -28,6 +28,8 @@ const agentChat = useAgentChatStore();
 const dialogOpen = ref(false);
 const selectedAction = ref<Capability | null>(null);
 const creating = ref(false);
+const transcribing = ref(false);
+const transcriptResult = ref<TranscribeResult | null>(null);
 const hoveredAction = ref<ActionOption | null>(null);
 const tooltipStyle = ref<Record<string, string>>({});
 
@@ -36,9 +38,6 @@ const tooltipGap = 12;
 const viewportMargin = 16;
 
 const availableActions = computed<ActionOption[]>(() => {
-  if (store.selectedAssets.length === 0) {
-    return [];
-  }
   const capabilities = store.capabilities
     .filter(
       (capability) =>
@@ -54,6 +53,9 @@ const availableActions = computed<ActionOption[]>(() => {
         left.title.localeCompare(right.title)
       );
     });
+  if (store.selectedAssets.length === 0) {
+    return capabilities;
+  }
   return [...capabilities, agentAction];
 });
 
@@ -83,12 +85,16 @@ function openAction(action: ActionOption) {
   }
   selectedAction.value = action;
   dialogOpen.value = true;
+  transcribing.value = false;
+  transcriptResult.value = null;
 }
 
 function closeDialog() {
   dialogOpen.value = false;
   selectedAction.value = null;
   store.clearShotDetectResult();
+  transcribing.value = false;
+  transcriptResult.value = null;
 }
 
 watch(
@@ -107,6 +113,18 @@ watch(
     } else {
       store.clearShotDetectResult();
     }
+  },
+);
+
+watch(
+  () => store.transcribeResult,
+  (result) => {
+    if (!result || !dialogOpen.value || selectedAction.value?.id !== "audio.transcribe") {
+      return;
+    }
+    transcribing.value = false;
+    transcriptResult.value = result;
+    store.clearTranscribeResult();
   },
 );
 
@@ -161,7 +179,11 @@ async function submitAction(params: Record<string, unknown>) {
     }
 
     await store.createJob(payload);
-    closeDialog();
+    if (selectedAction.value.id === "audio.transcribe") {
+      transcribing.value = true;
+    } else {
+      closeDialog();
+    }
   } catch (err) {
     store.setError(err instanceof Error ? err.message : "Unable to create job");
   } finally {
@@ -175,16 +197,16 @@ async function submitAction(params: Record<string, unknown>) {
     <div class="mb-3 flex items-start justify-between gap-3">
       <div>
         <h4>Actions</h4>
-        <p class="text-muted-foreground text-xs">
+        <!-- <p class="text-muted-foreground text-xs">
           {{ store.selectedAssets.length }} selected
-        </p>
+        </p> -->
       </div>
-      <Badge v-if="store.selectedAssets.length" variant="outline">
+      <Badge v-if="availableActions.length" variant="outline">
         {{ availableActions.length }} available
       </Badge>
     </div>
 
-    <div v-if="store.selectedAssets.length === 0" class="rounded-md border border-dashed p-4">
+    <div v-if="availableActions.length === 0" class="rounded-md border border-dashed p-4">
       <p class="text-muted-foreground">
         Select one or more assets to see compatible capabilities.
       </p>
@@ -250,6 +272,8 @@ async function submitAction(params: Record<string, unknown>) {
   <ActionDialog
     :open="dialogOpen"
     :action="selectedAction"
+    :transcribing="transcribing"
+    :transcript-result="transcriptResult"
     @close="closeDialog"
     @submit="submitAction"
   />

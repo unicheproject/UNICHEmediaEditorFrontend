@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 import { api } from "@/lib/api";
+import type { TranscriptSegment } from "@/lib/transcriptExport";
 import type { Asset, Capability, Job, Project, ShotDetectShot } from "@/types/api";
 
 const TERMINAL_STATUSES = new Set(["succeeded", "failed", "cancelled"]);
@@ -16,6 +17,50 @@ export interface ShotDetectResult {
   shots: ShotDetectShot[];
 }
 
+export interface TranscribeResult {
+  jobId: string;
+  assetId: string | null;
+  text: string;
+  segments: TranscriptSegment[] | null;
+}
+
+function extractTranscriptText(output: Record<string, unknown> | null): string {
+  if (!output) {
+    return "";
+  }
+  if (typeof output.text === "string") {
+    return output.text;
+  }
+  if (typeof output.transcript === "string") {
+    return output.transcript;
+  }
+  if (typeof output.transcription === "string") {
+    return output.transcription;
+  }
+  const stringValue = Object.values(output).find((value) => typeof value === "string");
+  return typeof stringValue === "string" ? stringValue : "";
+}
+
+function extractTranscriptSegments(output: Record<string, unknown> | null): TranscriptSegment[] | null {
+  const segments = output?.segments;
+  if (!Array.isArray(segments)) {
+    return null;
+  }
+  const parsed = segments
+    .map((segment) => {
+      if (!segment || typeof segment !== "object") {
+        return null;
+      }
+      const { start, end, text } = segment as Record<string, unknown>;
+      if (typeof start !== "number" || typeof end !== "number" || typeof text !== "string") {
+        return null;
+      }
+      return { start, end, text };
+    })
+    .filter((segment): segment is TranscriptSegment => segment !== null);
+  return parsed.length ? parsed : null;
+}
+
 export const useWorkspaceStore = defineStore("workspace", () => {
   const projects = ref<Project[]>([]);
   const selectedProjectId = ref<string | null>(null);
@@ -28,6 +73,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
   const error = ref<string | null>(null);
   const jobNotice = ref<JobNotice | null>(null);
   const shotDetectResult = ref<ShotDetectResult | null>(null);
+  const transcribeResult = ref<TranscribeResult | null>(null);
   const activePolls = new Map<string, number>();
 
   const selectedProject = computed(
@@ -48,6 +94,10 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     jobs.value.some((job) => !TERMINAL_STATUSES.has(job.status)),
   );
 
+  const activeJob = computed(
+    () => latestJobs.value.find((job) => !TERMINAL_STATUSES.has(job.status)) ?? null,
+  );
+
   function setError(message: string | null) {
     error.value = message;
   }
@@ -58,6 +108,10 @@ export const useWorkspaceStore = defineStore("workspace", () => {
 
   function clearShotDetectResult() {
     shotDetectResult.value = null;
+  }
+
+  function clearTranscribeResult() {
+    transcribeResult.value = null;
   }
 
   function capabilityTitle(capabilityId: string) {
@@ -235,6 +289,18 @@ export const useWorkspaceStore = defineStore("workspace", () => {
                 shotDetectResult.value = { assetId: job.asset_id, shots: output.shots };
               }
             }
+            if (job.capability_id === "audio.transcribe") {
+              const output = job.output as Record<string, unknown> | null;
+              const text = extractTranscriptText(output);
+              if (text) {
+                transcribeResult.value = {
+                  jobId: job.id,
+                  assetId: job.asset_id,
+                  text,
+                  segments: extractTranscriptSegments(output),
+                };
+              }
+            }
           } else if (job.status === "failed") {
             jobNotice.value = {
               status: "failed",
@@ -262,6 +328,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     jobs,
     latestJobs,
     hasRunningJob,
+    activeJob,
     selectedAssetIds,
     selectedAssets,
     loading,
@@ -269,9 +336,12 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     error,
     jobNotice,
     shotDetectResult,
+    transcribeResult,
     setError,
     setJobNotice,
     clearShotDetectResult,
+    clearTranscribeResult,
+    capabilityTitle,
     loadInitial,
     loadProjectData,
     selectProject,
