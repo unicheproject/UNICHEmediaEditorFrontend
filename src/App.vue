@@ -160,18 +160,6 @@ function handlePopState() {
         <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
 
-      <!-- <Teleport to="body">
-        <div
-          v-if="store.hasRunningJob"
-          class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/40 backdrop-blur-sm"
-        >
-          <div class="flex flex-col items-center gap-3">
-            <div class="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p class="font-bold ">Job is running…</p>
-          </div>
-        </div>
-      </Teleport> -->
-
       <Teleport to="body">
         <div
           v-if="agentChat.sending || agentChat.creatingSession"
