@@ -26,6 +26,23 @@ export function hasAssetIdsInput(capability: Capability) {
   return capability.input_schema.properties?.asset_ids?.type === "array";
 }
 
+// Capabilities that take one asset of each listed type (e.g. one video + one
+// subtitle), rather than an arbitrary-length asset_ids array.
+const PAIRED_ASSET_CAPABILITY_TYPES: Record<string, MediaType[]> = {
+  "video.subtitle.embed": ["video", "subtitle"],
+  "audio.mix": ["video", "audio"],
+};
+
+function supportsPairedSelection(capability: Capability, assets: Asset[]) {
+  const pairTypes = PAIRED_ASSET_CAPABILITY_TYPES[capability.id];
+  if (!pairTypes) {
+    return false;
+  }
+  const selectedTypes = assets.map((asset) => asset.media_type);
+  const hasNoDuplicateTypes = new Set(selectedTypes).size === selectedTypes.length;
+  return hasNoDuplicateTypes && selectedTypes.every((type) => pairTypes.includes(type));
+}
+
 // Capabilities that generate new media from scratch (text, params) rather than
 // operating on a selected asset. These stay visible with no assets selected.
 const STANDALONE_CAPABILITY_IDS = new Set(["audio.tts", "media.titlecard"]);
@@ -44,17 +61,16 @@ export function visibleInputProperties(capability: Capability) {
   );
 }
 
-export function supportsSelection(capability: Capability, assets: Asset[]) {
-  if (!capability.enabled) {
-    return false;
-  }
-
+// Returns null when the capability can run against the current selection, or
+// a one-line, user-facing reason why it can't (used to keep inapplicable
+// actions visible-but-disabled instead of hiding them).
+function selectionReason(capability: Capability, assets: Asset[]): string | null {
   if (isStandaloneCapability(capability)) {
-    return true;
+    return null;
   }
 
   if (assets.length === 0) {
-    return false;
+    return "Select an asset";
   }
 
   const selectedTypes = new Set(assets.map((asset) => asset.media_type));
@@ -63,14 +79,37 @@ export function supportsSelection(capability: Capability, assets: Asset[]) {
   );
 
   if (!supportsEveryType) {
-    return false;
+    return `Requires ${capability.supported_media_types.map(mediaLabel).join(" or ")}`;
   }
 
   if (assets.length > 1) {
-    return hasAssetIdsInput(capability);
+    if (hasAssetIdsInput(capability)) {
+      return null;
+    }
+    const pairTypes = PAIRED_ASSET_CAPABILITY_TYPES[capability.id];
+    if (pairTypes) {
+      if (supportsPairedSelection(capability, assets)) {
+        return null;
+      }
+      return `Select 1 ${mediaLabel(pairTypes[0]).toLowerCase()} and 1 ${mediaLabel(pairTypes[1]).toLowerCase()}`;
+    }
+    return "Select a single asset";
   }
 
-  return true;
+  return null;
+}
+
+export function supportsSelection(capability: Capability, assets: Asset[]) {
+  return capability.enabled && selectionReason(capability, assets) === null;
+}
+
+// One-line reason an action can't run against the current selection, for
+// display on a disabled action button. Null when the action is applicable.
+export function unavailableReason(capability: Capability, assets: Asset[]): string | null {
+  if (!capability.enabled) {
+    return "Unavailable";
+  }
+  return selectionReason(capability, assets);
 }
 
 export function requiredFields(capability: Capability) {
@@ -287,6 +326,34 @@ export function fieldMin(capabilityId: string, fieldName: string): number | unde
 
 export function fieldMax(capabilityId: string, fieldName: string): number | undefined {
   return FIELD_META[`${capabilityId}.${fieldName}`]?.max;
+}
+
+export function isAssetReference(name: string, property: JsonSchemaProperty) {
+  return name.endsWith("_asset_id") && property.format === "uuid";
+}
+
+export function normalizeValue(property: JsonSchemaProperty, raw: string) {
+  if (property.type === "integer") {
+    return Number.parseInt(raw, 10);
+  }
+  if (property.type === "number") {
+    return Number.parseFloat(raw);
+  }
+  if (property.type === "boolean") {
+    return raw === "true";
+  }
+  if (property.type === "array") {
+    return raw
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) =>
+        property.items?.type === "number" || property.items?.type === "integer"
+          ? Number(item)
+          : item,
+      );
+  }
+  return raw;
 }
 
 export function assetFieldMediaType(fieldName: string): MediaType | null {

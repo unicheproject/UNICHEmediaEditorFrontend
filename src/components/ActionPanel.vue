@@ -16,7 +16,7 @@ import {
   costLabel,
   hasAssetIdsInput,
   isAgentAction,
-  supportsSelection,
+  unavailableReason,
   type ActionOption,
 } from "@/lib/capabilities";
 import { useAgentChatStore } from "@/stores/agentChat";
@@ -37,13 +37,11 @@ const tooltipWidth = 288;
 const tooltipGap = 12;
 const viewportMargin = 16;
 
+// Inapplicable actions stay visible but disabled (with a reason) rather than
+// being hidden, so the panel always shows the full set of capabilities.
 const availableActions = computed<ActionOption[]>(() => {
   const capabilities = store.capabilities
-    .filter(
-      (capability) =>
-        capability.id !== "video.compose" &&
-        supportsSelection(capability, store.selectedAssets),
-    )
+    .filter((capability) => capability.id !== "video.compose")
     .sort((left, right) => {
       const leftPresentation = presentationFor(left);
       const rightPresentation = presentationFor(right);
@@ -58,6 +56,17 @@ const availableActions = computed<ActionOption[]>(() => {
   }
   return [...capabilities, agentAction];
 });
+
+const applicableActionCount = computed(
+  () => availableActions.value.filter((action) => !reasonFor(action)).length,
+);
+
+function reasonFor(action: ActionOption): string | null {
+  if (isAgentAction(action)) {
+    return null;
+  }
+  return unavailableReason(action, store.selectedAssets);
+}
 
 const groupedActions = computed(() => {
   const groups = new Map<ActionGroup, ActionOption[]>();
@@ -79,6 +88,9 @@ function iconFor(action: ActionOption) {
 }
 
 function openAction(action: ActionOption) {
+  if (reasonFor(action)) {
+    return;
+  }
   if (isAgentAction(action)) {
     void agentChat.openChat();
     return;
@@ -172,7 +184,10 @@ async function submitAction(params: Record<string, unknown>) {
       input,
     };
 
-    if (hasAssetIdsInput(selectedAction.value)) {
+    if (selectedAction.value.id === "video.subtitle.embed" || selectedAction.value.id === "audio.mix") {
+      payload.asset_id = input.video_asset_id as string;
+      delete input.video_asset_id;
+    } else if (hasAssetIdsInput(selectedAction.value)) {
       payload.input.asset_ids = selectedIds;
     } else {
       payload.asset_id = selectedIds[0];
@@ -202,14 +217,12 @@ async function submitAction(params: Record<string, unknown>) {
         </p> -->
       </div>
       <Badge v-if="availableActions.length" variant="outline">
-        {{ availableActions.length }} available
+        {{ applicableActionCount }} available
       </Badge>
     </div>
 
     <div v-if="availableActions.length === 0" class="rounded-md border border-dashed p-4">
-      <p class="text-muted-foreground">
-        Select one or more assets to see compatible capabilities.
-      </p>
+      <p class="text-muted-foreground">No actions available yet.</p>
     </div>
 
     <div v-else class="space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
@@ -225,18 +238,24 @@ async function submitAction(params: Record<string, unknown>) {
           <button
             v-for="action in actions"
             :key="action.id"
-            class="flex items-center gap-1.5 rounded-[999px] border bg-background px-3 py-1.5 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            class="flex gap-1.5 border bg-background px-3 py-1.5 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background disabled:hover:text-muted-foreground"
+            :class="reasonFor(action) ? 'flex-col items-start rounded-xl' : 'items-center rounded-[999px]'"
             type="button"
             :aria-label="action.title"
-            :disabled="!isAgentAction(action) && creating"
+            :disabled="!isAgentAction(action) && (creating || !!reasonFor(action))"
             @blur="hideTooltip"
             @click="openAction(action)"
             @focus="showTooltip(action, $event)"
             @mouseenter="showTooltip(action, $event)"
             @mouseleave="hideTooltip"
           >
-            <component :is="iconFor(action)" class="h-4 w-4 shrink-0" />
-            <span class="whitespace-nowrap text-xs">{{ action.title }}</span>
+            <span class="flex items-center gap-1.5">
+              <component :is="iconFor(action)" class="h-4 w-4 shrink-0" />
+              <span class="whitespace-nowrap text-xs">{{ action.title }}</span>
+            </span>
+            <span v-if="reasonFor(action)" class="whitespace-nowrap text-[10px] opacity-80">
+              {{ reasonFor(action) }}
+            </span>
           </button>
         </div>
       </section>

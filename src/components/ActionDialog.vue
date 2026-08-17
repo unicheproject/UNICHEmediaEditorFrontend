@@ -6,7 +6,9 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import AudioMixAction from "@/components/AudioMixAction.vue";
 import ImageCropAction from "@/components/ImageCropAction.vue";
+import VideoSubtitleEmbedAction from "@/components/VideoSubtitleEmbedAction.vue";
 import VideoTimelineAction from "@/components/VideoTimelineAction.vue";
 import {
   assetFieldMediaType,
@@ -15,6 +17,8 @@ import {
   fieldMax,
   fieldMin,
   fieldStep,
+  isAssetReference,
+  normalizeValue,
   requiredFields,
   visibleInputProperties,
 } from "@/lib/capabilities";
@@ -137,34 +141,6 @@ function assetOptions(name: string): Asset[] {
   return store.assets.filter((asset) => asset.media_type === mediaType);
 }
 
-function isAssetReference(name: string, property: JsonSchemaProperty) {
-  return name.endsWith("_asset_id") && property.format === "uuid";
-}
-
-function normalizeValue(property: JsonSchemaProperty, raw: string) {
-  if (property.type === "integer") {
-    return Number.parseInt(raw, 10);
-  }
-  if (property.type === "number") {
-    return Number.parseFloat(raw);
-  }
-  if (property.type === "boolean") {
-    return raw === "true";
-  }
-  if (property.type === "array") {
-    return raw
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .map((item) =>
-        property.items?.type === "number" || property.items?.type === "integer"
-          ? Number(item)
-          : item,
-      );
-  }
-  return raw;
-}
-
 function submit() {
   const params: Record<string, unknown> = {};
   for (const [name, property] of fields.value) {
@@ -193,6 +169,22 @@ function submit() {
     :open="open"
     :action="action"
     :asset="cropAsset"
+    @close="emit('close')"
+    @submit="emit('submit', $event)"
+  />
+
+  <VideoSubtitleEmbedAction
+    v-else-if="action && action.id === 'video.subtitle.embed'"
+    :open="open"
+    :action="action"
+    @close="emit('close')"
+    @submit="emit('submit', $event)"
+  />
+
+  <AudioMixAction
+    v-else-if="action && action.id === 'audio.mix'"
+    :open="open"
+    :action="action"
     @close="emit('close')"
     @submit="emit('submit', $event)"
   />
