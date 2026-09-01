@@ -1,18 +1,37 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Download, FileAudio, FileText, Film, Image, Play, Trash2, Upload } from "lucide-vue-next";
+import {
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  Download,
+  FileAudio,
+  FileText,
+  Film,
+  Image,
+  Play,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-vue-next";
 
 import AssetPlayerDialog from "@/components/AssetPlayerDialog.vue";
 import AuthedMedia from "@/components/AuthedMedia.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import VideoThumbnail from "@/components/VideoThumbnail.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
+import Input from "@/components/ui/Input.vue";
+import Select from "@/components/ui/Select.vue";
 import { downloadAsset } from "@/lib/api";
 import { mediaLabel } from "@/lib/capabilities";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace";
 import type { Asset, MediaType } from "@/types/api";
+
+type SortField = "date" | "name" | "size" | "type";
+type SortDirection = "asc" | "desc";
 
 const store = useWorkspaceStore();
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -20,9 +39,45 @@ const playerAsset = ref<Asset | null>(null);
 const assetToDelete = ref<Asset | null>(null);
 const deleting = ref(false);
 
-const sortedAssets = computed(() =>
-  [...store.assets].sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at)),
-);
+const searchQuery = ref("");
+const typeFilter = ref<MediaType | "all">("all");
+const sortField = ref<SortField>("date");
+const sortDirection = ref<SortDirection>("desc");
+
+const presentMediaTypes = computed(() => {
+  const types = new Set(store.assets.map((asset) => asset.media_type));
+  return (["image", "audio", "video", "subtitle"] as MediaType[]).filter((type) => types.has(type));
+});
+
+const nameSuggestions = computed(() => [...new Set(store.assets.map((asset) => asset.original_filename))]);
+
+function toggleSortDirection() {
+  sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+}
+
+const sortedAssets = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  const filtered = store.assets.filter((asset) => {
+    const matchesType = typeFilter.value === "all" || asset.media_type === typeFilter.value;
+    const matchesQuery = !query || asset.original_filename.toLowerCase().includes(query);
+    return matchesType && matchesQuery;
+  });
+
+  const direction = sortDirection.value === "asc" ? 1 : -1;
+  return filtered.sort((left, right) => {
+    let comparison = 0;
+    if (sortField.value === "name") {
+      comparison = left.original_filename.localeCompare(right.original_filename);
+    } else if (sortField.value === "size") {
+      comparison = left.size_bytes - right.size_bytes;
+    } else if (sortField.value === "type") {
+      comparison = left.media_type.localeCompare(right.media_type);
+    } else {
+      comparison = Date.parse(left.created_at) - Date.parse(right.created_at);
+    }
+    return comparison * direction;
+  });
+});
 
 function iconFor(mediaType: MediaType) {
   return {
@@ -142,6 +197,55 @@ async function uploadFiles(event: Event) {
       </div>
     </div>
 
+    <div v-if="store.assets.length" class="flex flex-wrap items-center gap-2">
+      <div class="relative min-w-[200px] flex-1">
+        <Search class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          v-model="searchQuery"
+          list="asset-name-suggestions"
+          placeholder="Search assets by name…"
+          class="pl-8 pr-8"
+        />
+        <datalist id="asset-name-suggestions">
+          <option v-for="name in nameSuggestions" :key="name" :value="name" />
+        </datalist>
+        <button
+          v-if="searchQuery"
+          type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          aria-label="Clear search"
+          @click="searchQuery = ''"
+        >
+          <X class="h-4 w-4" />
+        </button>
+      </div>
+
+      <Select v-model="typeFilter" class="w-auto">
+        <option value="all">All types</option>
+        <option v-for="type in presentMediaTypes" :key="type" :value="type">
+          {{ mediaLabel(type) }}
+        </option>
+      </Select>
+
+      <Select v-model="sortField" class="w-auto">
+        <option value="date">Sort by date</option>
+        <option value="name">Sort by name</option>
+        <option value="size">Sort by size</option>
+        <option value="type">Sort by type</option>
+      </Select>
+
+      <Button
+        variant="muted"
+        size="icon"
+        :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
+        :aria-label="sortDirection === 'asc' ? 'Sort ascending' : 'Sort descending'"
+        @click="toggleSortDirection"
+      >
+        <ArrowUpNarrowWide v-if="sortDirection === 'asc'" class="h-4 w-4" />
+        <ArrowDownWideNarrow v-else class="h-4 w-4" />
+      </Button>
+    </div>
+
     <div
       v-if="sortedAssets.length"
       class="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] content-start gap-3 overflow-auto pr-1"
@@ -166,6 +270,11 @@ async function uploadFiles(event: Event) {
             kind="img"
             :alt="asset.original_filename"
             class="aspect-[4/3] h-full w-full object-cover"
+          />
+          <VideoThumbnail
+            v-else-if="asset.media_type === 'video'"
+            :asset-id="asset.id"
+            :alt="asset.original_filename"
           />
           <component
             :is="iconFor(asset.media_type)"
@@ -234,6 +343,16 @@ async function uploadFiles(event: Event) {
         </div>
       </Card>
     </div>
+
+    <Card v-else-if="store.assets.length" class="flex min-h-0 flex-1 items-center justify-center border-dashed p-8 text-center">
+      <div class="max-w-sm">
+        <Search class="mx-auto h-10 w-10 text-muted-foreground" />
+        <h3 class="mt-3">No matching assets</h3>
+        <p class="mt-1 text-muted-foreground">
+          Try a different search term or clear the type filter.
+        </p>
+      </div>
+    </Card>
 
     <Card v-else class="flex min-h-0 flex-1 items-center justify-center border-dashed p-8 text-center">
       <div class="max-w-sm">
