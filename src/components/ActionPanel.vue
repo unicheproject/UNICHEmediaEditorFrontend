@@ -188,7 +188,9 @@ async function submitAction(params: Record<string, unknown>) {
       payload.asset_id = input.video_asset_id as string;
       delete input.video_asset_id;
     } else if (hasAssetIdsInput(selectedAction.value)) {
-      payload.input.asset_ids = selectedIds;
+      // VideoConcatAction (etc.) may already have set an explicit, user-ordered
+      // asset_ids list; only fall back to raw selection order otherwise.
+      payload.input.asset_ids = Array.isArray(input.asset_ids) ? input.asset_ids : selectedIds;
     } else {
       payload.asset_id = selectedIds[0];
     }

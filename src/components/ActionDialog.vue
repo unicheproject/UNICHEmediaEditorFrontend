@@ -6,10 +6,32 @@ import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import Textarea from "@/components/ui/Textarea.vue";
+import AssetOrderAction from "@/components/AssetOrderAction.vue";
 import AudioMixAction from "@/components/AudioMixAction.vue";
 import ImageCropAction from "@/components/ImageCropAction.vue";
 import VideoSubtitleEmbedAction from "@/components/VideoSubtitleEmbedAction.vue";
 import VideoTimelineAction from "@/components/VideoTimelineAction.vue";
+import type { MediaType } from "@/types/api";
+
+// Capabilities that take an ordered asset_ids list, and how to present the
+// reorderable item list for each.
+const ASSET_ORDER_CAPABILITIES: Record<string, { mediaType: MediaType; itemsLabel: string; orderHint: string }> = {
+  "video.concat": {
+    mediaType: "video",
+    itemsLabel: "videos",
+    orderHint: "Drag to reorder, or use the arrows. Clips are joined in this order.",
+  },
+  "audio.concat": {
+    mediaType: "audio",
+    itemsLabel: "audio clips",
+    orderHint: "Drag to reorder, or use the arrows. Clips are joined in this order.",
+  },
+  "image.slideshow": {
+    mediaType: "image",
+    itemsLabel: "images",
+    orderHint: "Drag to reorder, or use the arrows. Images appear in this order.",
+  },
+};
 import {
   assetFieldMediaType,
   fieldHint,
@@ -80,6 +102,9 @@ async function saveTranscriptAsset() {
 
 const fields = computed(() => (props.action ? visibleInputProperties(props.action) : []));
 const required = computed(() => (props.action ? requiredFields(props.action) : new Set<string>()));
+const assetOrderConfig = computed(() =>
+  props.action ? ASSET_ORDER_CAPABILITIES[props.action.id] : undefined,
+);
 const timelineAsset = computed(() => {
   if (!props.action || !["video.trim", "video.split"].includes(props.action.id)) {
     return null;
@@ -177,6 +202,17 @@ function submit() {
     v-else-if="action && action.id === 'video.subtitle.embed'"
     :open="open"
     :action="action"
+    @close="emit('close')"
+    @submit="emit('submit', $event)"
+  />
+
+  <AssetOrderAction
+    v-else-if="action && assetOrderConfig"
+    :open="open"
+    :action="action"
+    :media-type="assetOrderConfig.mediaType"
+    :items-label="assetOrderConfig.itemsLabel"
+    :order-hint="assetOrderConfig.orderHint"
     @close="emit('close')"
     @submit="emit('submit', $event)"
   />
