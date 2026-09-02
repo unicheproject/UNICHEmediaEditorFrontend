@@ -226,6 +226,15 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     }
   }
 
+  async function updateAsset(assetId: string, payload: { original_filename?: string }) {
+    const asset = await api.updateAsset(assetId, payload);
+    const index = assets.value.findIndex((candidate) => candidate.id === assetId);
+    if (index >= 0) {
+      assets.value.splice(index, 1, asset);
+    }
+    return asset;
+  }
+
   async function deleteAsset(assetId: string) {
     await api.deleteAsset(assetId);
     assets.value = assets.value.filter((asset) => asset.id !== assetId);
@@ -363,6 +372,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     updateProject,
     deleteProject,
     uploadAsset,
+    updateAsset,
     deleteAsset,
     toggleAsset,
     clearSelection,

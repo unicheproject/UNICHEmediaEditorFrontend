@@ -10,6 +10,7 @@ import {
   Image,
   LayoutGrid,
   List,
+  Pencil,
   Play,
   Search,
   Trash2,
@@ -24,6 +25,7 @@ import VideoThumbnail from "@/components/VideoThumbnail.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
+import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
 import { downloadAsset } from "@/lib/api";
@@ -40,6 +42,9 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const playerAsset = ref<Asset | null>(null);
 const assetToDelete = ref<Asset | null>(null);
 const deleting = ref(false);
+const assetToRename = ref<Asset | null>(null);
+const renameDraft = ref("");
+const renaming = ref(false);
 
 const searchQuery = ref("");
 const typeFilter = ref<MediaType | "all">("all");
@@ -156,6 +161,37 @@ async function confirmDeleteAsset() {
     store.setError(err instanceof Error ? err.message : "Unable to delete asset");
   } finally {
     deleting.value = false;
+  }
+}
+
+function openRename(asset: Asset) {
+  assetToRename.value = asset;
+  renameDraft.value = asset.original_filename;
+}
+
+function closeRename() {
+  assetToRename.value = null;
+  renameDraft.value = "";
+}
+
+async function submitRename() {
+  const asset = assetToRename.value;
+  const name = renameDraft.value.trim();
+  if (!asset || !name) {
+    return;
+  }
+  if (name === asset.original_filename) {
+    closeRename();
+    return;
+  }
+  renaming.value = true;
+  try {
+    await store.updateAsset(asset.id, { original_filename: name });
+    closeRename();
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to rename asset");
+  } finally {
+    renaming.value = false;
   }
 }
 
@@ -375,9 +411,20 @@ async function uploadFiles(event: Event) {
           </Button>
         </div>
         <div class="flex min-h-32 flex-1 flex-col p-3">
-          <p class="font-bold line-clamp-2 truncate" :title="asset.original_filename">
-            {{ asset.original_filename }}
-          </p>
+          <div class="flex items-start justify-between gap-1">
+            <p class="font-bold line-clamp-2 truncate" :title="asset.original_filename">
+              {{ asset.original_filename }}
+            </p>
+            <button
+              type="button"
+              class="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Rename asset"
+              aria-label="Rename asset"
+              @click.stop="openRename(asset)"
+            >
+              <Pencil class="h-3.5 w-3.5" />
+            </button>
+          </div>
           <p class="mt-1 text-xs text-muted-foreground">
             {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
           </p>
@@ -472,7 +519,18 @@ async function uploadFiles(event: Event) {
           class="h-5 w-5 shrink-0 text-muted-foreground"
         />
         <div class="min-w-0 flex-1">
-          <p class="truncate font-bold" :title="asset.original_filename">{{ asset.original_filename }}</p>
+          <div class="flex items-center gap-1.5">
+            <p class="truncate font-bold" :title="asset.original_filename">{{ asset.original_filename }}</p>
+            <button
+              type="button"
+              class="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Rename asset"
+              aria-label="Rename asset"
+              @click.stop="openRename(asset)"
+            >
+              <Pencil class="h-3.5 w-3.5" />
+            </button>
+          </div>
           <p class="text-xs text-muted-foreground">
             {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
           </p>
@@ -544,6 +602,18 @@ async function uploadFiles(event: Event) {
     </Card>
 
     <AssetPlayerDialog :open="!!playerAsset" :asset="playerAsset" @close="closePlayer" />
+    <Dialog :open="!!assetToRename" title="Rename asset" @close="closeRename">
+      <form class="space-y-4" @submit.prevent="submitRename">
+        <label class="block space-y-2">
+          <span class="field-label">Name</span>
+          <Input v-model="renameDraft" required placeholder="Asset name" />
+        </label>
+        <div class="flex justify-end gap-2">
+          <Button variant="muted" type="button" :disabled="renaming" @click="closeRename">Cancel</Button>
+          <Button type="submit" :disabled="renaming || !renameDraft.trim()">Save</Button>
+        </div>
+      </form>
+    </Dialog>
     <ConfirmDialog
       :open="!!assetToDelete"
       title="Delete asset"

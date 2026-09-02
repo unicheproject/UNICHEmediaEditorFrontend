@@ -161,6 +161,11 @@ export const api = {
   listAssets: (projectId: string) => request<Asset[]>(`/projects/${projectId}/assets`),
   uploadAsset: (projectId: string, file: File, onProgress?: (fraction: number) => void) =>
     uploadAssetRequest(projectId, file, onProgress),
+  updateAsset: (assetId: string, payload: { original_filename?: string }) =>
+    request<Asset>(`/assets/${assetId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   deleteAsset: (assetId: string) => request<void>(`/assets/${assetId}`, { method: "DELETE" }),
   listCapabilities: () => request<Capability[]>("/capabilities"),
   createJob: (payload: {
