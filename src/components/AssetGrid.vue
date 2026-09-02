@@ -8,6 +8,8 @@ import {
   FileText,
   Film,
   Image,
+  LayoutGrid,
+  List,
   Play,
   Search,
   Trash2,
@@ -43,6 +45,7 @@ const searchQuery = ref("");
 const typeFilter = ref<MediaType | "all">("all");
 const sortField = ref<SortField>("date");
 const sortDirection = ref<SortDirection>("desc");
+const viewMode = ref<"grid" | "list">("grid");
 
 const presentMediaTypes = computed(() => {
   const types = new Set(store.assets.map((asset) => asset.media_type));
@@ -53,6 +56,10 @@ const nameSuggestions = computed(() => [...new Set(store.assets.map((asset) => a
 
 function toggleSortDirection() {
   sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+}
+
+function toggleViewMode() {
+  viewMode.value = viewMode.value === "grid" ? "list" : "grid";
 }
 
 const sortedAssets = computed(() => {
@@ -244,10 +251,21 @@ async function uploadFiles(event: Event) {
         <ArrowUpNarrowWide v-if="sortDirection === 'asc'" class="h-4 w-4" />
         <ArrowDownWideNarrow v-else class="h-4 w-4" />
       </Button>
+
+      <Button
+        variant="muted"
+        size="icon"
+        :title="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'"
+        :aria-label="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'"
+        @click="toggleViewMode"
+      >
+        <List v-if="viewMode === 'grid'" class="h-4 w-4" />
+        <LayoutGrid v-else class="h-4 w-4" />
+      </Button>
     </div>
 
     <div
-      v-if="sortedAssets.length"
+      v-if="sortedAssets.length && viewMode === 'grid'"
       class="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] content-start gap-3 overflow-auto pr-1"
     >
       <Card
@@ -342,6 +360,83 @@ async function uploadFiles(event: Event) {
           </div>
         </div>
       </Card>
+    </div>
+
+    <div
+      v-else-if="sortedAssets.length"
+      class="flex min-h-0 flex-1 flex-col gap-1.5 overflow-auto pr-1"
+    >
+      <div
+        v-for="asset in sortedAssets"
+        :key="asset.id"
+        class="group flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 transition-colors hover:border-primary/60"
+        :class="isSelected(asset) && 'border-primary ring-2 ring-primary/20'"
+        :draggable="canUseOnTimeline(asset)"
+        @click="store.toggleAsset(asset.id)"
+        @dragstart="dragAsset(asset, $event)"
+      >
+        <input
+          type="checkbox"
+          class="h-4 w-4 shrink-0 accent-primary"
+          :checked="isSelected(asset)"
+          aria-label="Select asset"
+          @click.stop
+          @change="store.toggleAsset(asset.id)"
+        />
+        <component
+          :is="iconFor(asset.media_type)"
+          class="h-5 w-5 shrink-0 text-muted-foreground"
+        />
+        <div class="min-w-0 flex-1">
+          <p class="truncate font-bold" :title="asset.original_filename">{{ asset.original_filename }}</p>
+          <p class="text-xs text-muted-foreground">
+            {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
+          </p>
+        </div>
+        <Badge class="shrink-0 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
+          {{ mediaLabel(asset.media_type) }}
+        </Badge>
+        <Badge
+          class="shrink-0"
+          :variant="asset.source_asset_id ? 'success' : 'outline'"
+          :class="asset.source_asset_id ? 'bg-[#e7f1f0]' : 'bg-[#f3f4f6]'"
+        >
+          {{ asset.source_asset_id ? "Derived" : "Original" }}
+        </Badge>
+        <div class="flex shrink-0 items-center gap-1">
+          <Button
+            v-if="canPlay(asset)"
+            variant="outline"
+            size="icon"
+            title="Play asset"
+            aria-label="Play asset"
+            @click.stop="openPlayer(asset)"
+          >
+            <Play class="h-4 w-4" />
+            <span class="sr-only">Play asset</span>
+          </Button>
+          <Button
+            variant="muted"
+            size="icon"
+            title="Delete asset"
+            aria-label="Delete asset"
+            @click.stop="assetToDelete = asset"
+          >
+            <Trash2 class="h-4 w-4 text-destructive" />
+            <span class="sr-only">Delete asset</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            title="Download asset"
+            aria-label="Download asset"
+            @click.stop="downloadAsset(asset)"
+          >
+            <Download class="h-4 w-4" />
+            <span class="sr-only">Download asset</span>
+          </Button>
+        </div>
+      </div>
     </div>
 
     <Card v-else-if="store.assets.length" class="flex min-h-0 flex-1 items-center justify-center border-dashed p-8 text-center">
