@@ -30,7 +30,7 @@ import { downloadAsset } from "@/lib/api";
 import { mediaLabel } from "@/lib/capabilities";
 import { cn } from "@/lib/utils";
 import { useWorkspaceStore } from "@/stores/workspace";
-import type { Asset, MediaType } from "@/types/api";
+import type { Asset, JobStatus, MediaType } from "@/types/api";
 
 type SortField = "date" | "name" | "size" | "type";
 type SortDirection = "asc" | "desc";
@@ -53,6 +53,10 @@ const presentMediaTypes = computed(() => {
 });
 
 const nameSuggestions = computed(() => [...new Set(store.assets.map((asset) => asset.original_filename))]);
+
+const ACTIVE_JOB_STATUSES = new Set<JobStatus>(["queued", "running"]);
+const pendingJobs = computed(() => store.jobs.filter((job) => ACTIVE_JOB_STATUSES.has(job.status)));
+const hasPendingItems = computed(() => store.uploads.length > 0 || pendingJobs.value.length > 0);
 
 function toggleSortDirection() {
   sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
@@ -204,7 +208,7 @@ async function uploadFiles(event: Event) {
       </div>
     </div>
 
-    <div v-if="store.assets.length" class="flex flex-wrap items-center gap-2">
+    <div v-if="store.assets.length || hasPendingItems" class="flex flex-wrap items-center gap-2">
       <div class="relative min-w-[200px] flex-1">
         <Search class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -265,9 +269,53 @@ async function uploadFiles(event: Event) {
     </div>
 
     <div
-      v-if="sortedAssets.length && viewMode === 'grid'"
+      v-if="(sortedAssets.length || hasPendingItems) && viewMode === 'grid'"
       class="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(220px,1fr))] content-start gap-3 overflow-auto pr-1"
     >
+      <Card
+        v-for="upload in store.uploads"
+        :key="`upload-${upload.id}`"
+        class="flex h-[350px] flex-col overflow-hidden"
+      >
+        <div class="relative flex aspect-[4/3] items-center justify-center bg-muted">
+          <div class="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+          <Badge class="absolute left-2 top-2 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
+            Uploading
+          </Badge>
+        </div>
+        <div class="flex min-h-32 flex-1 flex-col p-3">
+          <p class="truncate font-bold" :title="upload.name">{{ upload.name }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">{{ upload.progress }}%</p>
+          <div class="mt-auto h-1.5 overflow-hidden rounded-full bg-muted">
+            <div class="h-full rounded-full bg-primary transition-all" :style="{ width: `${upload.progress}%` }" />
+          </div>
+        </div>
+      </Card>
+
+      <Card
+        v-for="job in pendingJobs"
+        :key="`job-${job.id}`"
+        class="flex h-[350px] flex-col overflow-hidden"
+      >
+        <div class="relative flex aspect-[4/3] items-center justify-center bg-muted">
+          <div class="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+          <Badge class="absolute left-2 top-2 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
+            Generating
+          </Badge>
+        </div>
+        <div class="flex min-h-32 flex-1 flex-col p-3">
+          <p class="truncate font-bold" :title="store.capabilityTitle(job.capability_id)">
+            {{ store.capabilityTitle(job.capability_id) }}
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {{ job.status === "queued" ? "Queued" : `${job.progress}%` }}
+          </p>
+          <div class="mt-auto h-1.5 overflow-hidden rounded-full bg-muted">
+            <div class="h-full rounded-full bg-primary transition-all" :style="{ width: `${job.progress}%` }" />
+          </div>
+        </div>
+      </Card>
+
       <Card
         v-for="asset in sortedAssets"
         :key="asset.id"
@@ -363,9 +411,45 @@ async function uploadFiles(event: Event) {
     </div>
 
     <div
-      v-else-if="sortedAssets.length"
+      v-else-if="sortedAssets.length || hasPendingItems"
       class="flex min-h-0 flex-1 flex-col gap-1.5 overflow-auto pr-1"
     >
+      <div
+        v-for="upload in store.uploads"
+        :key="`upload-${upload.id}`"
+        class="flex items-center gap-3 rounded-md border px-3 py-2"
+      >
+        <div class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+        <div class="min-w-0 flex-1">
+          <p class="truncate font-bold" :title="upload.name">{{ upload.name }}</p>
+          <div class="mt-1 h-1 w-full max-w-[200px] overflow-hidden rounded-full bg-muted">
+            <div class="h-full rounded-full bg-primary transition-all" :style="{ width: `${upload.progress}%` }" />
+          </div>
+        </div>
+        <Badge class="shrink-0 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
+          Uploading {{ upload.progress }}%
+        </Badge>
+      </div>
+
+      <div
+        v-for="job in pendingJobs"
+        :key="`job-${job.id}`"
+        class="flex items-center gap-3 rounded-md border px-3 py-2"
+      >
+        <div class="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+        <div class="min-w-0 flex-1">
+          <p class="truncate font-bold" :title="store.capabilityTitle(job.capability_id)">
+            {{ store.capabilityTitle(job.capability_id) }}
+          </p>
+          <div class="mt-1 h-1 w-full max-w-[200px] overflow-hidden rounded-full bg-muted">
+            <div class="h-full rounded-full bg-primary transition-all" :style="{ width: `${job.progress}%` }" />
+          </div>
+        </div>
+        <Badge class="shrink-0 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
+          {{ job.status === "queued" ? "Queued" : `${job.progress}%` }}
+        </Badge>
+      </div>
+
       <div
         v-for="asset in sortedAssets"
         :key="asset.id"

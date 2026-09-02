@@ -86,6 +86,60 @@ export async function downloadAsset(asset: Asset): Promise<void> {
   }
 }
 
+/**
+ * Uploads a file with upload-progress reporting. The Fetch API has no upload
+ * progress event, so this uses XMLHttpRequest instead of authedFetch/request.
+ */
+function uploadAssetRequest(
+  projectId: string,
+  file: File,
+  onProgress?: (fraction: number) => void,
+): Promise<Asset> {
+  return getToken().then(
+    (token) =>
+      new Promise<Asset>((resolve, reject) => {
+        const form = new FormData();
+        form.append("file", file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${API_BASE_URL}${API_PREFIX}/projects/${projectId}/assets`);
+        if (token) {
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        }
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            onProgress?.(event.loaded / event.total);
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status === 401) {
+            login(window.location.pathname + window.location.search);
+            reject(new Error("Not authenticated"));
+            return;
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText) as Asset);
+            } catch {
+              reject(new Error("Invalid response from server"));
+            }
+            return;
+          }
+          let message = `Request failed with ${xhr.status}`;
+          try {
+            const payload = JSON.parse(xhr.responseText) as ApiErrorPayload;
+            message = payload.error?.message ?? JSON.stringify(payload.detail ?? payload);
+          } catch {
+            message = xhr.responseText || message;
+          }
+          reject(new Error(message));
+        };
+        xhr.onerror = () => reject(new Error("Network error while uploading"));
+        xhr.send(form);
+      }),
+  );
+}
+
 export const api = {
   listProjects: () => request<Project[]>("/projects"),
   createProject: (payload: {
@@ -105,14 +159,8 @@ export const api = {
   deleteProject: (projectId: string) =>
     request<void>(`/projects/${projectId}`, { method: "DELETE" }),
   listAssets: (projectId: string) => request<Asset[]>(`/projects/${projectId}/assets`),
-  uploadAsset: (projectId: string, file: File) => {
-    const form = new FormData();
-    form.append("file", file);
-    return request<Asset>(`/projects/${projectId}/assets`, {
-      method: "POST",
-      body: form,
-    });
-  },
+  uploadAsset: (projectId: string, file: File, onProgress?: (fraction: number) => void) =>
+    uploadAssetRequest(projectId, file, onProgress),
   deleteAsset: (assetId: string) => request<void>(`/assets/${assetId}`, { method: "DELETE" }),
   listCapabilities: () => request<Capability[]>("/capabilities"),
   createJob: (payload: {

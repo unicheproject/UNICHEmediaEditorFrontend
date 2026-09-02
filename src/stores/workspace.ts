@@ -24,6 +24,12 @@ export interface TranscribeResult {
   segments: TranscriptSegment[] | null;
 }
 
+export interface UploadProgress {
+  id: string;
+  name: string;
+  progress: number;
+}
+
 function extractTranscriptText(output: Record<string, unknown> | null): string {
   if (!output) {
     return "";
@@ -69,7 +75,8 @@ export const useWorkspaceStore = defineStore("workspace", () => {
   const jobs = ref<Job[]>([]);
   const selectedAssetIds = ref<Set<string>>(new Set());
   const loading = ref(false);
-  const uploading = ref(false);
+  const uploads = ref<UploadProgress[]>([]);
+  const uploading = computed(() => uploads.value.length > 0);
   const error = ref<string | null>(null);
   const jobNotice = ref<JobNotice | null>(null);
   const shotDetectResult = ref<ShotDetectResult | null>(null);
@@ -204,12 +211,18 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     if (!selectedProjectId.value) {
       throw new Error("Select a project before uploading assets.");
     }
-    uploading.value = true;
+    const uploadId = crypto.randomUUID();
+    uploads.value = [...uploads.value, { id: uploadId, name: file.name, progress: 0 }];
     try {
-      const asset = await api.uploadAsset(selectedProjectId.value, file);
+      const asset = await api.uploadAsset(selectedProjectId.value, file, (fraction) => {
+        const entry = uploads.value.find((candidate) => candidate.id === uploadId);
+        if (entry) {
+          entry.progress = Math.round(fraction * 100);
+        }
+      });
       assets.value = [asset, ...assets.value];
     } finally {
-      uploading.value = false;
+      uploads.value = uploads.value.filter((candidate) => candidate.id !== uploadId);
     }
   }
 
@@ -332,6 +345,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     selectedAssetIds,
     selectedAssets,
     loading,
+    uploads,
     uploading,
     error,
     jobNotice,
