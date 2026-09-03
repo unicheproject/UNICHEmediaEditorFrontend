@@ -142,22 +142,22 @@ function handlePopState() {
 
       <div
         v-if="store.jobNotice"
-        class="fixed left-1/2 bottom-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] px-4 py-[18px] text-[13px] font-bold"
+        class="fixed left-1/2 top-8 z-50 flex w-[calc(100vw-2rem)] max-w-3xl -translate-x-1/2 items-center justify-between gap-3 rounded-lg border-l-[3px] px-4 py-[18px] text-[13px] text-[#030712] font-bold shadow-lg"
         :class="
           store.jobNotice.status === 'succeeded'
-            ? 'border-[#0f7a6e] bg-[#eef6f5]'
-            : 'border-[#c0185e] bg-[#fbeff4]'
+            ? 'border-[#0f7a6e] bg-[#cfe4e2]'
+            : 'border-[#c0185e] bg-[#f2d1df]'
         "
       >
         <div class="flex min-w-0 items-center gap-2">
           <Check
             v-if="store.jobNotice.status === 'succeeded'"
-            class="h-4 w-4 shrink-0 text-foreground"
+            class="h-4 w-4 shrink-0 text-[#030712]"
           />
-          <X v-else class="h-4 w-4 shrink-0 text-foreground" />
-          <span class="truncate">{{ store.jobNotice.message }}</span>
+          <X v-else class="h-4 w-4 shrink-0 text-[#030712]" />
+          <span>{{ store.jobNotice.message }}</span>
         </div>
-        <Button size="sm" variant="ghost" @click="store.setJobNotice(null)">Dismiss</Button>
+        <Button size="sm" variant="muted" @click="store.setJobNotice(null)">Dismiss</Button>
       </div>
 
       <Teleport to="body">
