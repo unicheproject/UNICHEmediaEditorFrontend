@@ -357,8 +357,8 @@ async function uploadFiles(event: Event) {
         :key="asset.id"
         :class="
           cn(
-            'group flex h-[350px] cursor-pointer flex-col overflow-hidden transition-colors hover:border-primary/60',
-            isSelected(asset) && 'border-primary ring-2 ring-primary/20',
+            'group flex h-[350px] cursor-pointer flex-col overflow-hidden transition-colors hover:shadow-lg hover:border-2 hover:border-primary/60',
+            isSelected(asset) && 'border-2 border-primary ring-2 ring-primary/20',
           )
         "
         :draggable="canUseOnTimeline(asset)"
