@@ -15,7 +15,12 @@ const { thumbnailUrl, loading } = useAssetThumbnail(() => props.assetId);
 
 <template>
   <div class="relative h-full w-full">
-    <img v-if="thumbnailUrl" :src="thumbnailUrl" :alt="alt" class="h-full w-full object-cover" />
+    <img
+      v-if="thumbnailUrl"
+      :src="thumbnailUrl"
+      :alt="alt"
+      class="absolute inset-0 h-full w-full object-cover"
+    />
     <div v-else class="absolute inset-0 flex items-center justify-center">
       <div
         v-if="loading"

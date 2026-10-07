@@ -368,7 +368,7 @@ async function uploadFiles(event: Event) {
         @click="store.toggleAsset(asset.id)"
         @dragstart="dragAsset(asset, $event)"
       >
-        <div class="relative aspect-[4/3] bg-muted">
+        <div class="relative aspect-[4/3] shrink-0 overflow-hidden bg-muted">
           <AssetThumbnail
             v-if="hasThumbnail(asset)"
             :asset-id="asset.id"
