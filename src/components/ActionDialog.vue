@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
+import SliderInput from "@/components/ui/SliderInput.vue";
 import Textarea from "@/components/ui/Textarea.vue";
 import AssetOrderAction from "@/components/AssetOrderAction.vue";
 import AudioMixAction from "@/components/AudioMixAction.vue";
@@ -36,12 +37,16 @@ import {
   assetFieldMediaType,
   fieldHint,
   fieldInputType,
+  fieldLabel,
   fieldMax,
   fieldMin,
   fieldStep,
+  fieldUnit,
   isAssetReference,
+  isSliderField,
   normalizeValue,
   requiredFields,
+  sliderUnit,
   visibleInputProperties,
 } from "@/lib/capabilities";
 import { TRANSCRIPT_EXPORT_FORMATS, transcriptExportFile, type TranscriptExportFormat } from "@/lib/transcriptExport";
@@ -137,25 +142,19 @@ watch(
   { immediate: true },
 );
 
-function fieldLabel(name: string) {
-  return name
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase());
-}
-
 function fieldHintText(name: string, property: JsonSchemaProperty) {
   if (property.type === "array") {
     return "Enter comma-separated values.";
   }
-  return props.action ? fieldHint(props.action.id, name) : undefined;
+  return props.action ? fieldHint(props.action.id, name, property) : undefined;
 }
 
-function inputMin(name: string) {
-  return props.action ? fieldMin(props.action.id, name) : undefined;
+function inputMin(name: string, property: JsonSchemaProperty) {
+  return props.action ? fieldMin(props.action.id, name, property) : undefined;
 }
 
-function inputMax(name: string) {
-  return props.action ? fieldMax(props.action.id, name) : undefined;
+function inputMax(name: string, property: JsonSchemaProperty) {
+  return props.action ? fieldMax(props.action.id, name, property) : undefined;
 }
 
 function assetOptions(name: string): Asset[] {
@@ -271,7 +270,7 @@ function submit() {
       <div v-if="fields.length" class="space-y-4">
         <label v-for="[name, property] in fields" :key="name" class="block space-y-2">
           <span class="field-label">
-            {{ fieldLabel(name) }}
+            {{ fieldLabel(name, property) }}
             <span v-if="required.has(name)" class="text-destructive">*</span>
           </span>
 
@@ -286,7 +285,7 @@ function submit() {
             </option>
           </Select>
 
-          <Select v-else-if="property.enum?.length" v-model="values[name]">
+          <Select v-else-if="property.enum?.length" v-model="values[name]" :suffix="fieldUnit(property)">
             <option v-for="option in property.enum" :key="option" :value="option">
               {{ option }}
             </option>
@@ -298,14 +297,26 @@ function submit() {
             :placeholder="property.description"
           />
 
+          <SliderInput
+            v-else-if="action && isSliderField(action.id, name, property)"
+            v-model="values[name]"
+            :step="fieldStep(property)"
+            :min="inputMin(name, property)"
+            :max="inputMax(name, property)"
+            :required="required.has(name)"
+            :suffix="sliderUnit(property)"
+          />
+
           <Input
             v-else
             v-model="values[name]"
             :type="fieldInputType(property)"
             :step="fieldStep(property)"
-            :min="inputMin(name)"
-            :max="inputMax(name)"
+            :min="inputMin(name, property)"
+            :max="inputMax(name, property)"
             :required="required.has(name)"
+
+            :suffix="fieldUnit(property)"
             :placeholder="property.type === 'array' ? 'Comma-separated values' : property.description"
           />
 
