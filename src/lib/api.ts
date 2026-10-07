@@ -61,14 +61,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return (await response.json()) as T;
 }
 
-/** Fetch asset bytes with auth and return an object URL. Caller must revoke it. */
-export async function fetchAssetObjectUrl(assetId: string): Promise<string> {
-  const response = await authedFetch(`/assets/${assetId}/download`);
+async function fetchObjectUrl(path: string): Promise<string> {
+  const response = await authedFetch(path);
   if (!response.ok) {
     throw new Error(`Failed to load asset (${response.status})`);
   }
   const blob = await response.blob();
   return URL.createObjectURL(blob);
+}
+
+/** Fetch asset bytes with auth and return an object URL. Caller must revoke it. */
+export function fetchAssetObjectUrl(assetId: string): Promise<string> {
+  return fetchObjectUrl(`/assets/${assetId}/download`);
+}
+
+/** Fetch the backend-generated JPEG preview (image or video asset) as an object URL. */
+export function fetchAssetThumbnailObjectUrl(assetId: string): Promise<string> {
+  return fetchObjectUrl(`/assets/${assetId}/thumbnail`);
 }
 
 /** Download asset bytes with auth and save them with the original filename. */

@@ -19,9 +19,8 @@ import {
 } from "lucide-vue-next";
 
 import AssetPlayerDialog from "@/components/AssetPlayerDialog.vue";
-import AuthedMedia from "@/components/AuthedMedia.vue";
+import AssetThumbnail from "@/components/AssetThumbnail.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
-import VideoThumbnail from "@/components/VideoThumbnail.vue";
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
@@ -116,6 +115,10 @@ function formatSize(bytes: number) {
 
 function isSelected(asset: Asset) {
   return store.selectedAssetIds.has(asset.id);
+}
+
+function hasThumbnail(asset: Asset) {
+  return asset.media_type === "image" || asset.media_type === "video";
 }
 
 function canPlay(asset: Asset) {
@@ -366,17 +369,11 @@ async function uploadFiles(event: Event) {
         @dragstart="dragAsset(asset, $event)"
       >
         <div class="relative aspect-[4/3] bg-muted">
-          <AuthedMedia
-            v-if="asset.media_type === 'image'"
-            :asset-id="asset.id"
-            kind="img"
-            :alt="asset.original_filename"
-            class="aspect-[4/3] h-full w-full object-cover"
-          />
-          <VideoThumbnail
-            v-else-if="asset.media_type === 'video'"
+          <AssetThumbnail
+            v-if="hasThumbnail(asset)"
             :asset-id="asset.id"
             :alt="asset.original_filename"
+            :fallback-icon="iconFor(asset.media_type)"
           />
           <component
             :is="iconFor(asset.media_type)"
