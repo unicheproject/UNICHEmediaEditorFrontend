@@ -3,9 +3,10 @@ import { computed, ref } from "vue";
 
 import { api } from "@/lib/api";
 import type { TranscriptSegment } from "@/lib/transcriptExport";
-import type { Asset, Capability, Job, Project, ShotDetectShot } from "@/types/api";
+import type { Asset, Capability, Job, JobStatus, Project, ShotDetectShot } from "@/types/api";
 
 const TERMINAL_STATUSES = new Set(["succeeded", "failed", "cancelled"]);
+export const JOBS_PAGE_SIZE = 10;
 
 export interface JobNotice {
   status: "succeeded" | "failed" | "cancelled";
@@ -73,6 +74,13 @@ export const useWorkspaceStore = defineStore("workspace", () => {
   const assets = ref<Asset[]>([]);
   const capabilities = ref<Capability[]>([]);
   const jobs = ref<Job[]>([]);
+  // One page of the project's full job history for the jobs panel. `jobs` above
+  // stays the most recent jobs, which drive polling and the pending asset cards.
+  const jobsPage = ref(1);
+  const jobsPageItems = ref<Job[]>([]);
+  const jobsTotal = ref(0);
+  const jobsPageLoading = ref(false);
+  const jobsStatusFilter = ref<JobStatus | "">("");
   const selectedAssetIds = ref<Set<string>>(new Set());
   const loading = ref(false);
   const uploads = ref<UploadProgress[]>([]);
@@ -150,6 +158,8 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     if (!projectId) {
       assets.value = [];
       jobs.value = [];
+      jobsPageItems.value = [];
+      jobsTotal.value = 0;
       selectedAssetIds.value = new Set();
       return;
     }
@@ -157,6 +167,8 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     const [assetList, jobPage] = await Promise.all([
       api.listAssets(projectId),
       api.listProjectJobs(projectId),
+      // A failed history page shouldn't block assets from loading.
+      loadJobsPage(jobsPage.value, projectId).catch(() => undefined),
     ]);
     assets.value = assetList;
     jobs.value = jobPage.items;
@@ -165,8 +177,45 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     );
   }
 
+  async function loadJobsPage(page: number, projectId = selectedProjectId.value) {
+    if (!projectId) {
+      return;
+    }
+    jobsPageLoading.value = true;
+    try {
+      const status = jobsStatusFilter.value || undefined;
+      const result = await api.listProjectJobs(projectId, {
+        limit: JOBS_PAGE_SIZE,
+        offset: (page - 1) * JOBS_PAGE_SIZE,
+        status,
+      });
+      // Ignore a late response for a project or filter the user has already left.
+      if (projectId !== selectedProjectId.value || status !== (jobsStatusFilter.value || undefined)) {
+        return;
+      }
+      const lastPage = Math.max(1, Math.ceil(result.total / JOBS_PAGE_SIZE));
+      if (page > lastPage) {
+        // The page emptied out (e.g. jobs removed); fall back to the last one.
+        await loadJobsPage(lastPage, projectId);
+        return;
+      }
+      jobsPage.value = page;
+      jobsPageItems.value = result.items;
+      jobsTotal.value = result.total;
+    } finally {
+      jobsPageLoading.value = false;
+    }
+  }
+
+  async function setJobsStatusFilter(status: JobStatus | "") {
+    jobsStatusFilter.value = status;
+    await loadJobsPage(1);
+  }
+
   async function selectProject(projectId: string) {
     selectedProjectId.value = projectId;
+    jobsPage.value = 1;
+    jobsStatusFilter.value = "";
     selectedAssetIds.value = new Set();
     await loadProjectData(projectId);
   }
@@ -203,6 +252,8 @@ export const useWorkspaceStore = defineStore("workspace", () => {
       selectedProjectId.value = null;
       assets.value = [];
       jobs.value = [];
+      jobsPageItems.value = [];
+      jobsTotal.value = 0;
       selectedAssetIds.value = new Set();
     }
   }
@@ -271,6 +322,8 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     });
     upsertJob(job);
     pollJob(job.id);
+    // Jump to the first page so the new job is visible and the total is current.
+    void loadJobsPage(1).catch(() => undefined);
     return job;
   }
 
@@ -349,6 +402,13 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     capabilities,
     jobs,
     latestJobs,
+    jobsPage,
+    jobsPageItems,
+    jobsTotal,
+    jobsPageLoading,
+    jobsStatusFilter,
+    loadJobsPage,
+    setJobsStatusFilter,
     hasRunningJob,
     activeJob,
     selectedAssetIds,

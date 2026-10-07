@@ -7,6 +7,7 @@ import type {
   Asset,
   Capability,
   Job,
+  JobStatus,
   Page,
   Project,
 } from "@/types/api";
@@ -184,8 +185,16 @@ export const api = {
     input?: Record<string, unknown>;
   }) => request<Job>("/jobs", { method: "POST", body: JSON.stringify(payload) }),
   getJob: (jobId: string) => request<Job>(`/jobs/${jobId}`),
-  listProjectJobs: (projectId: string) =>
-    request<Page<Job>>(`/projects/${projectId}/jobs?limit=20&offset=0`),
+  listProjectJobs: (
+    projectId: string,
+    { limit = 20, offset = 0, status }: { limit?: number; offset?: number; status?: JobStatus } = {},
+  ) => {
+    const query = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (status) {
+      query.set("status", status);
+    }
+    return request<Page<Job>>(`/projects/${projectId}/jobs?${query}`);
+  },
   createAgentSession: (payload: { project_id: string; asset_ids: string[] }) =>
     request<AgentSession>("/agent/sessions", {
       method: "POST",
