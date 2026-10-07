@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Edit, FolderPlus, MoreVertical, RefreshCw, Trash2 } from "lucide-vue-next";
+import { Copy, Edit, FolderPlus, MoreVertical, Plus, RefreshCw, Trash2 } from "lucide-vue-next";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
@@ -167,6 +167,16 @@ function openCreate() {
   createOpen.value = true;
 }
 
+/** Prefill the create dialog from an existing project (details only — assets aren't copied). */
+function openDuplicate(project: Project) {
+  openCreate();
+  name.value = `${project.name} (copy)`;
+  description.value = project.description ?? "";
+  if (project.org_id && orgs.value.some((org) => org.id === project.org_id)) {
+    orgId.value = project.org_id;
+  }
+}
+
 function openEdit(project: Project) {
   editingProject.value = project;
   name.value = project.name;
@@ -279,38 +289,58 @@ async function confirmDeleteProject() {
           class="flex min-h-56 cursor-pointer flex-col p-5 transition-colors hover:border-primary/60"
           @click="emit('openProject', project.id)"
         >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="card-title line-clamp-2">{{ project.name }}</div>
-              <div class="card-text line-clamp-3">
-                {{ project.description || "No description" }}
-              </div>
-            </div>
-            <div class="flex shrink-0 items-center gap-1">
-              <Button
-                variant="secondary"
-                size="icon"
-                title="Edit project"
-                aria-label="Edit project"
-                @click.stop="openEdit(project)"
-              >
-                <Edit class="h-4 w-4" />
-              </Button>
-              <Button
-                variant="muted"
-                size="icon"
-                title="Delete project"
-                aria-label="Delete project"
-                @click.stop="projectToDelete = project"
-              >
-                <Trash2 class="h-4 w-4 text-destructive" />
-              </Button>
-              <!-- <FolderOpen class="h-5 w-5 text-primary" /> -->
+          <div class="flex items-center justify-end gap-1">
+            <Button
+              variant="secondary"
+              size="icon"
+              title="Edit project"
+              aria-label="Edit project"
+              @click.stop="openEdit(project)"
+            >
+              <Edit class="h-4 w-4" />
+            </Button>
+            <Button
+              v-if="canCreate"
+              variant="secondary"
+              size="icon"
+              title="Duplicate project"
+              aria-label="Duplicate project"
+              @click.stop="openDuplicate(project)"
+            >
+              <Copy class="h-4 w-4" />
+            </Button>
+            <Button
+              variant="muted"
+              size="icon"
+              title="Delete project"
+              aria-label="Delete project"
+              @click.stop="projectToDelete = project"
+            >
+              <Trash2 class="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+          <div class="mt-3 min-w-0">
+            <div class="card-title line-clamp-2">{{ project.name }}</div>
+            <div class="card-text line-clamp-3">
+              {{ project.description || "No description" }}
             </div>
           </div>
           <div class="mt-auto border-t pt-4 text-xs text-muted-foreground">
             Updated {{ formatDate(project.updated_at) }}
           </div>
+        </Card>
+
+        <Card
+          v-if="canCreate"
+          role="button"
+          tabindex="0"
+          class="flex min-h-56 cursor-pointer flex-col items-center justify-center gap-3 border-dashed p-5 text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary focus-visible:border-primary/60 focus-visible:outline-none"
+          @click="openCreate"
+          @keydown.enter.prevent="openCreate"
+          @keydown.space.prevent="openCreate"
+        >
+          <Plus class="h-10 w-10" />
+          <div class="card-title">Add new project</div>
         </Card>
       </div>
 
