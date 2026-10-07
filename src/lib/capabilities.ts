@@ -316,15 +316,86 @@ const FIELD_META: Record<string, FieldMeta> = {
   },
 };
 
-export function fieldHint(capabilityId: string, fieldName: string): string | undefined {
-  return FIELD_META[`${capabilityId}.${fieldName}`]?.hint;
+// Human-readable label for a field. Prefers the backend-supplied schema
+// title (dynamic, per-capability) and only falls back to humanizing the raw
+// field name when the backend hasn't provided one.
+export function fieldLabel(name: string, property?: JsonSchemaProperty) {
+  if (property?.title) {
+    return property.title;
+  }
+  return name.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-export function fieldMin(capabilityId: string, fieldName: string): number | undefined {
+// Unit for a numeric field (e.g. "px", "seconds", "dB"), as supplied by the
+// backend schema. Undefined when the field has no associated unit.
+export function fieldUnit(property?: JsonSchemaProperty): string | undefined {
+  return property?.["x-unit"];
+}
+
+// True when the backend marks a numeric field as a percentage, in which case
+// it's rendered as a slider paired with a numeric field.
+export function isPercentField(property?: JsonSchemaProperty) {
+  const unit = fieldUnit(property)?.trim().toLowerCase();
+  return (
+    (property?.type === "number" || property?.type === "integer") &&
+    (unit === "percent" || unit === "%")
+  );
+}
+
+// True when a numeric field is rendered as a slider paired with a numeric
+// field. That needs a known range (schema minimum/maximum, falling back to
+// FIELD_META); percentages default to 0-100. Unbounded fields stay plain
+// number inputs.
+export function isSliderField(
+  capabilityId: string,
+  fieldName: string,
+  property?: JsonSchemaProperty,
+) {
+  if (isPercentField(property)) {
+    return true;
+  }
+  return (
+    (property?.type === "number" || property?.type === "integer") &&
+    fieldMin(capabilityId, fieldName, property) !== undefined &&
+    fieldMax(capabilityId, fieldName, property) !== undefined
+  );
+}
+
+// Unit shown inside a slider's numeric field.
+export function sliderUnit(property?: JsonSchemaProperty) {
+  return isPercentField(property) ? "%" : fieldUnit(property);
+}
+
+// Helper text shown below a field. Prefers the backend-supplied description,
+// falling back to the static FIELD_META table for capabilities the backend
+// hasn't annotated yet. The unit is rendered inside the input instead.
+export function fieldHint(
+  capabilityId: string,
+  fieldName: string,
+  property?: JsonSchemaProperty,
+): string | undefined {
+  return property?.description ?? FIELD_META[`${capabilityId}.${fieldName}`]?.hint;
+}
+
+export function fieldMin(
+  capabilityId: string,
+  fieldName: string,
+  property?: JsonSchemaProperty,
+): number | undefined {
+  if (property?.minimum !== undefined) {
+    return property.minimum;
+  }
   return FIELD_META[`${capabilityId}.${fieldName}`]?.min;
 }
 
-export function fieldMax(capabilityId: string, fieldName: string): number | undefined {
+export function fieldMax(
+  capabilityId: string,
+  fieldName: string,
+  property?: JsonSchemaProperty,
+): number | undefined {
+  if (property?.maximum !== undefined) {
+    return property.maximum;
+  }
   return FIELD_META[`${capabilityId}.${fieldName}`]?.max;
 }
 

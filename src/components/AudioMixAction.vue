@@ -5,16 +5,21 @@ import Button from "@/components/ui/Button.vue";
 import Dialog from "@/components/ui/Dialog.vue";
 import Input from "@/components/ui/Input.vue";
 import Select from "@/components/ui/Select.vue";
+import SliderInput from "@/components/ui/SliderInput.vue";
 import {
   assetFieldMediaType,
   fieldHint,
   fieldInputType,
+  fieldLabel,
   fieldMax,
   fieldMin,
   fieldStep,
+  fieldUnit,
   isAssetReference,
+  isSliderField,
   normalizeValue,
   requiredFields,
+  sliderUnit,
   visibleInputProperties,
 } from "@/lib/capabilities";
 import { useWorkspaceStore } from "@/stores/workspace";
@@ -79,10 +84,6 @@ watch(
   { immediate: true },
 );
 
-function fieldLabel(name: string) {
-  return name.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
-}
-
 function submit() {
   const videoAssetId = selectedVideo.value?.id ?? pickedVideoId.value;
   const audioAssetId = selectedAudio.value?.id ?? pickedAudioId.value;
@@ -142,29 +143,41 @@ function submit() {
 
       <label v-for="[name, property] in extraFields" :key="name" class="block space-y-2">
         <span class="field-label">
-          {{ fieldLabel(name) }}
+          {{ fieldLabel(name, property) }}
           <span v-if="required.has(name)" class="text-destructive">*</span>
         </span>
 
-        <Select v-if="property.enum?.length" v-model="values[name]">
+        <Select v-if="property.enum?.length" v-model="values[name]" :suffix="fieldUnit(property)">
           <option v-for="option in property.enum" :key="option" :value="option">
             {{ option }}
           </option>
         </Select>
+
+        <SliderInput
+          v-else-if="isSliderField(action.id, name, property)"
+          v-model="values[name]"
+          :step="fieldStep(property)"
+          :min="fieldMin(action.id, name, property)"
+          :max="fieldMax(action.id, name, property)"
+          :required="required.has(name)"
+          :suffix="sliderUnit(property)"
+        />
 
         <Input
           v-else
           v-model="values[name]"
           :type="fieldInputType(property)"
           :step="fieldStep(property)"
-          :min="fieldMin(action.id, name)"
-          :max="fieldMax(action.id, name)"
+          :min="fieldMin(action.id, name, property)"
+          :max="fieldMax(action.id, name, property)"
           :required="required.has(name)"
+
+          :suffix="fieldUnit(property)"
           :placeholder="property.description"
         />
 
-        <span v-if="fieldHint(action.id, name)" class="field-hint">
-          {{ fieldHint(action.id, name) }}
+        <span v-if="fieldHint(action.id, name, property)" class="field-hint">
+          {{ fieldHint(action.id, name, property) }}
         </span>
       </label>
 

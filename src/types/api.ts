@@ -46,6 +46,10 @@ export interface JsonSchemaProperty {
   description?: string;
   title?: string;
   default?: unknown;
+  minimum?: number;
+  maximum?: number;
+  // Backend-supplied unit for numeric fields (e.g. "px", "seconds", "dB").
+  "x-unit"?: string;
   items?: JsonSchemaProperty;
   properties?: Record<string, JsonSchemaProperty>;
 }
