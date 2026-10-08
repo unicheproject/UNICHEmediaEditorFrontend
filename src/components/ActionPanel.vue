@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { ChevronDown } from "lucide-vue-next";
 
 import ActionDialog from "@/components/ActionDialog.vue";
 import AgentChatPanel from "@/components/AgentChatPanel.vue";
@@ -22,6 +23,9 @@ import {
 import { useAgentChatStore } from "@/stores/agentChat";
 import { useWorkspaceStore, type TranscribeResult } from "@/stores/workspace";
 import type { Capability } from "@/types/api";
+
+defineProps<{ expanded: boolean }>();
+const emit = defineEmits<{ expand: [] }>();
 
 const store = useWorkspaceStore();
 const agentChat = useAgentChatStore();
@@ -210,24 +214,39 @@ async function submitAction(params: Record<string, unknown>) {
 </script>
 
 <template>
-  <Card class="flex min-h-0 flex-col p-4 border-accent-top">
-    <div class="mb-3 flex items-start justify-between gap-3">
+  <Card
+    class="flex min-h-0 flex-col p-4 border-accent-top"
+    :class="expanded ? 'flex-1' : 'shrink-0'"
+  >
+    <button
+      type="button"
+      class="flex w-full items-start justify-between gap-3 text-left"
+      :class="{ 'mb-3': expanded }"
+      :aria-expanded="expanded"
+      @click="emit('expand')"
+    >
       <div>
         <h4>Actions</h4>
         <!-- <p class="text-muted-foreground text-xs">
           {{ store.selectedAssets.length }} selected
         </p> -->
       </div>
-      <Badge v-if="availableActions.length" variant="outline">
-        {{ applicableActionCount }} available
-      </Badge>
-    </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <Badge v-if="availableActions.length" variant="outline">
+          {{ applicableActionCount }} available
+        </Badge>
+        <ChevronDown
+          class="h-4 w-4 text-muted-foreground transition-transform"
+          :class="{ 'rotate-180': expanded }"
+        />
+      </div>
+    </button>
 
-    <div v-if="availableActions.length === 0" class="rounded-md border border-dashed p-4">
+    <div v-if="expanded && availableActions.length === 0" class="rounded-md border border-dashed p-4">
       <p class="text-muted-foreground">No actions available yet.</p>
     </div>
 
-    <div v-else class="space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
+    <div v-else-if="expanded" class="min-h-0 space-y-4 overflow-auto pr-1" @scroll="hideTooltip">
       <section v-for="[group, actions] in groupedActions" :key="group" class="space-y-2">
         <div class="flex items-center justify-between gap-2">
           <p class="uppercase tracking-wide text-muted-foreground font-bold text-xs">

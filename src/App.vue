@@ -22,6 +22,8 @@ const agentChat = useAgentChatStore();
 
 const showingProjects = ref(true);
 const activeTab = ref<"assets" | "timeline">("assets");
+// Sidebar accordion: exactly one of the Actions / Jobs panels is expanded at a time.
+const expandedPanel = ref<"actions" | "jobs">("actions");
 
 onMounted(async () => {
   if (!auth.authenticated) {
@@ -208,9 +210,15 @@ function handlePopState() {
             class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-1"
           >
             <AssetGrid />
-            <aside class="grid min-h-0 gap-4 lg:grid-rows-[1fr_1fr]">
-              <ActionPanel />
-              <JobsPanel />
+            <aside class="flex min-h-0 flex-col gap-4">
+              <ActionPanel
+                :expanded="expandedPanel === 'actions'"
+                @expand="expandedPanel = 'actions'"
+              />
+              <JobsPanel
+                :expanded="expandedPanel === 'jobs'"
+                @expand="expandedPanel = 'jobs'"
+              />
             </aside>
           </div>
 

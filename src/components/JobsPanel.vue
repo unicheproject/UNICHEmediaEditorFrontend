@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-vue-next";
 
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
@@ -8,6 +8,9 @@ import Card from "@/components/ui/Card.vue";
 import Select from "@/components/ui/Select.vue";
 import { JOBS_PAGE_SIZE, useWorkspaceStore } from "@/stores/workspace";
 import type { Job, JobStatus } from "@/types/api";
+
+defineProps<{ expanded: boolean }>();
+const emit = defineEmits<{ expand: [] }>();
 
 const store = useWorkspaceStore();
 
@@ -82,83 +85,106 @@ function outputSummary(job: Job) {
 </script>
 
 <template>
-  <Card class="flex min-h-0 flex-col p-4 border-accent-top">
-    <div class="mb-3">
-      <h4>Jobs</h4>
-      <p class="text-muted-foreground text-xs">All project activity, newest first</p>
-    </div>
-
-    <label class="mb-3 block">
-      <span class="sr-only">Filter jobs by status</span>
-      <Select :model-value="store.jobsStatusFilter" @update:model-value="filterByStatus">
-        <option v-for="option in STATUS_OPTIONS" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </Select>
-    </label>
-
-    <div v-if="jobs.length" ref="list" class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
-      <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <p class="truncate font-bold text-xs">{{ job.capability_id }}</p>
-            <p class="text-muted-foreground text-[10px]">{{ outputSummary(job) }}</p>
-          </div>
-          <div class="flex shrink-0 items-center gap-1.5">
-            <div
-              v-if="isActive(job.status)"
-              class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-primary"
-            />
-            <Badge :variant="statusVariant(job.status)" class="py-1 px-2">{{ job.status }}</Badge>
-          </div>
-        </div>
-        <div class="h-1 overflow-hidden rounded-full bg-muted">
-          <div
-            class="h-full rounded-full bg-primary transition-all"
-            :class="{'progress-100': job.progress == 100}"
-            :style="{ width: `${job.progress}%` }"
-          />
-        </div>
-      </article>
-    </div>
-
-    <div
-      v-if="store.jobsTotal > JOBS_PAGE_SIZE"
-      class="mt-3 flex items-center justify-between gap-2 border-t pt-3"
+  <Card
+    class="flex min-h-0 flex-col p-4 border-accent-top"
+    :class="expanded ? 'flex-1' : 'shrink-0'"
+  >
+    <button
+      type="button"
+      class="flex w-full items-start justify-between gap-3 text-left"
+      :class="{ 'mb-3': expanded }"
+      :aria-expanded="expanded"
+      @click="emit('expand')"
     >
-      <span class="text-[10px] text-muted-foreground">
-        {{ rangeStart }}–{{ rangeEnd }} of {{ store.jobsTotal }}
-      </span>
-      <div class="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="icon"
-          title="Previous page"
-          aria-label="Previous page"
-          :disabled="store.jobsPage <= 1 || store.jobsPageLoading"
-          @click="goToPage(store.jobsPage - 1)"
-        >
-          <ChevronLeft class="h-4 w-4" />
-        </Button>
-        <span class="min-w-12 text-center text-xs">{{ store.jobsPage }} / {{ pageCount }}</span>
-        <Button
-          variant="outline"
-          size="icon"
-          title="Next page"
-          aria-label="Next page"
-          :disabled="store.jobsPage >= pageCount || store.jobsPageLoading"
-          @click="goToPage(store.jobsPage + 1)"
-        >
-          <ChevronRight class="h-4 w-4" />
-        </Button>
+      <div>
+        <h4>Jobs</h4>
+        <p class="text-muted-foreground text-xs">All project activity, newest first</p>
       </div>
-    </div>
+      <ChevronDown
+        class="h-4 w-4 shrink-0 text-muted-foreground transition-transform"
+        :class="{ 'rotate-180': expanded }"
+      />
+    </button>
 
-    <p v-else-if="store.jobsStatusFilter" class="rounded-md border border-dashed p-4 text-muted-foreground">
-      No {{ store.jobsStatusFilter }} jobs.
-    </p>
-    <p v-else class="rounded-md border border-dashed p-4 text-muted-foreground">
-      Created jobs will appear here with live polling until they finish.
-    </p>
+    <div v-show="expanded" class="flex min-h-0 flex-1 flex-col">
+      <label class="mb-2 block">
+        <span class="sr-only">Filter jobs by status</span>
+        <Select
+          class="py-1.5 pl-3 text-xs"
+          :model-value="store.jobsStatusFilter"
+          @update:model-value="filterByStatus"
+        >
+          <option v-for="option in STATUS_OPTIONS" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </Select>
+      </label>
+
+      <div v-if="jobs.length" ref="list" class="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
+        <article v-for="job in jobs" :key="job.id" class="rounded-md border bg-background p-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="truncate font-bold text-xs">{{ job.capability_id }}</p>
+              <p class="text-muted-foreground text-[10px]">{{ outputSummary(job) }}</p>
+            </div>
+            <div class="flex shrink-0 items-center gap-1.5">
+              <div
+                v-if="isActive(job.status)"
+                class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-primary"
+              />
+              <Badge :variant="statusVariant(job.status)" class="py-1 px-2">{{ job.status }}</Badge>
+            </div>
+          </div>
+          <div class="h-1 overflow-hidden rounded-full bg-muted">
+            <div
+              class="h-full rounded-full bg-primary transition-all"
+              :class="{'progress-100': job.progress == 100}"
+              :style="{ width: `${job.progress}%` }"
+            />
+          </div>
+        </article>
+      </div>
+
+      <div
+        v-if="store.jobsTotal > JOBS_PAGE_SIZE"
+        class="mt-2 flex items-center justify-between gap-2 border-t pt-2"
+      >
+        <span class="text-[10px] text-muted-foreground">
+          {{ rangeStart }}–{{ rangeEnd }} of {{ store.jobsTotal }}
+        </span>
+        <div class="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            class="h-7 w-7"
+            title="Previous page"
+            aria-label="Previous page"
+            :disabled="store.jobsPage <= 1 || store.jobsPageLoading"
+            @click="goToPage(store.jobsPage - 1)"
+          >
+            <ChevronLeft class="h-3.5 w-3.5" />
+          </Button>
+          <span class="min-w-12 text-center text-xs">{{ store.jobsPage }} / {{ pageCount }}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            class="h-7 w-7"
+            title="Next page"
+            aria-label="Next page"
+            :disabled="store.jobsPage >= pageCount || store.jobsPageLoading"
+            @click="goToPage(store.jobsPage + 1)"
+          >
+            <ChevronRight class="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <p v-else-if="store.jobsStatusFilter" class="rounded-md border border-dashed p-4 text-muted-foreground">
+        No {{ store.jobsStatusFilter }} jobs.
+      </p>
+      <p v-else class="rounded-md border border-dashed p-4 text-muted-foreground">
+        Created jobs will appear here with live polling until they finish.
+      </p>
+    </div>
   </Card>
 </template>
