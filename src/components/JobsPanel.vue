@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-vue-next";
 
 import Badge from "@/components/ui/Badge.vue";
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
 import Select from "@/components/ui/Select.vue";
+import { api } from "@/lib/api";
 import { JOBS_PAGE_SIZE, useWorkspaceStore } from "@/stores/workspace";
 import type { Job, JobStatus } from "@/types/api";
 
@@ -82,6 +83,73 @@ function outputSummary(job: Job) {
   }
   return job.error ?? "Waiting for output";
 }
+
+const detailsJobId = ref<string | null>(null);
+const details = ref<Job | null>(null);
+const detailsLoading = ref(false);
+const detailsError = ref<string | null>(null);
+
+async function loadDetails(jobId: string) {
+  detailsLoading.value = true;
+  detailsError.value = null;
+  try {
+    const job = await api.getJob(jobId);
+    if (detailsJobId.value === jobId) {
+      details.value = job;
+    }
+  } catch (err) {
+    if (detailsJobId.value === jobId) {
+      detailsError.value = err instanceof Error ? err.message : "Unable to load job details";
+    }
+  } finally {
+    if (detailsJobId.value === jobId) {
+      detailsLoading.value = false;
+    }
+  }
+}
+
+function toggleDetails(job: Job) {
+  if (detailsJobId.value === job.id) {
+    detailsJobId.value = null;
+    details.value = null;
+    return;
+  }
+  detailsJobId.value = job.id;
+  details.value = null;
+  void loadDetails(job.id);
+}
+
+// Refresh the open details whenever polling reports a change to that job.
+watch(
+  () => jobs.value.find((job) => job.id === detailsJobId.value)?.updated_at,
+  (updatedAt, previous) => {
+    if (detailsJobId.value && updatedAt && previous && updatedAt !== previous) {
+      void loadDetails(detailsJobId.value);
+    }
+  },
+);
+
+function formatDateTime(value: string | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatElapsed(job: Job) {
+  if (!job.started_at || !job.finished_at) return "—";
+  const seconds = (new Date(job.finished_at).getTime() - new Date(job.started_at).getTime()) / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)} s`;
+  return `${Math.floor(seconds / 60)} min ${Math.round(seconds % 60)} s`;
+}
+
+function formatJson(value: unknown) {
+  return JSON.stringify(value, null, 2);
+}
 </script>
 
 <template>
@@ -141,6 +209,52 @@ function outputSummary(job: Job) {
               :class="{'progress-100': job.progress == 100}"
               :style="{ width: `${job.progress}%` }"
             />
+          </div>
+          <button
+            type="button"
+            class="mt-2 flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+            :aria-expanded="detailsJobId === job.id"
+            @click="toggleDetails(job)"
+          >
+            {{ detailsJobId === job.id ? "Hide details" : "View details" }}
+            <ChevronDown
+              class="h-3 w-3 transition-transform"
+              :class="{ 'rotate-180': detailsJobId === job.id }"
+            />
+          </button>
+          <div v-if="detailsJobId === job.id" class="mt-2 space-y-2 border-t pt-2 text-[10px]">
+            <p v-if="detailsError" class="text-destructive">{{ detailsError }}</p>
+            <p v-else-if="!details" class="text-muted-foreground">Loading details…</p>
+            <template v-else>
+              <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                <dt class="text-muted-foreground">Job ID</dt>
+                <dd class="break-all font-mono">{{ details.id }}</dd>
+                <dt class="text-muted-foreground">Asset</dt>
+                <dd class="break-all font-mono">{{ details.asset_id ?? "—" }}</dd>
+                <dt class="text-muted-foreground">Progress</dt>
+                <dd>{{ details.progress }}%</dd>
+                <dt class="text-muted-foreground">Created</dt>
+                <dd>{{ formatDateTime(details.created_at) }}</dd>
+                <dt class="text-muted-foreground">Started</dt>
+                <dd>{{ formatDateTime(details.started_at) }}</dd>
+                <dt class="text-muted-foreground">Finished</dt>
+                <dd>{{ formatDateTime(details.finished_at) }}</dd>
+                <dt class="text-muted-foreground">Run time</dt>
+                <dd>{{ formatElapsed(details) }}</dd>
+              </dl>
+              <div v-if="details.error">
+                <p class="mb-1 font-semibold">Error</p>
+                <p class="whitespace-pre-wrap break-words rounded bg-muted p-2 text-destructive">{{ details.error }}</p>
+              </div>
+              <div>
+                <p class="mb-1 font-semibold">Input</p>
+                <pre class="max-h-40 overflow-auto rounded bg-muted p-2 font-mono">{{ formatJson(details.input) }}</pre>
+              </div>
+              <div v-if="details.output">
+                <p class="mb-1 font-semibold">Output</p>
+                <pre class="max-h-40 overflow-auto rounded bg-muted p-2 font-mono">{{ formatJson(details.output) }}</pre>
+              </div>
+            </template>
           </div>
         </article>
       </div>
