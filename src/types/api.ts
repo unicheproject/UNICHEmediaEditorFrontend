@@ -30,6 +30,9 @@ export interface Asset {
   mime_type: string;
   extension: string;
   size_bytes: number;
+  width?: number | null;
+  height?: number | null;
+  duration_seconds?: number | null;
   storage_path: string;
   checksum_sha256: string;
   source_asset_id: string | null;

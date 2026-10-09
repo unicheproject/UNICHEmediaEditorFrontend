@@ -113,6 +113,25 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function formatDuration(seconds: number) {
+  const total = Math.round(seconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = String(total % 60).padStart(2, "0");
+  return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${secs}` : `${minutes}:${secs}`;
+}
+
+function assetDetails(asset: Asset) {
+  const parts = [asset.extension.toUpperCase(), formatSize(asset.size_bytes)];
+  if ((asset.media_type === "image" || asset.media_type === "video") && asset.width && asset.height) {
+    parts.push(`${asset.width}×${asset.height}`);
+  }
+  if ((asset.media_type === "video" || asset.media_type === "audio") && asset.duration_seconds != null) {
+    parts.push(formatDuration(asset.duration_seconds));
+  }
+  return parts.join(" · ");
+}
+
 function isSelected(asset: Asset) {
   return store.selectedAssetIds.has(asset.id);
 }
@@ -423,7 +442,7 @@ async function uploadFiles(event: Event) {
             </button>
           </div>
           <p class="mt-1 text-xs text-muted-foreground">
-            {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
+            {{ assetDetails(asset) }}
           </p>
           <div class="mt-auto flex items-center justify-between gap-2">
             <span class="truncate text-[10px] text-muted-foreground">{{ asset.id.slice(0, 8) }}</span>
@@ -529,7 +548,7 @@ async function uploadFiles(event: Event) {
             </button>
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ asset.extension.toUpperCase() }} · {{ formatSize(asset.size_bytes) }}
+            {{ assetDetails(asset) }}
           </p>
         </div>
         <Badge class="shrink-0 text-[#7b3fc4] bg-[#f5ecfa]" variant="secondary">
