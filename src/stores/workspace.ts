@@ -294,6 +294,18 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     selectedAssetIds.value = selected;
   }
 
+  async function bulkDeleteAssets(assetIds: string[]) {
+    if (!selectedProjectId.value) {
+      throw new Error("Select a project before deleting assets.");
+    }
+    await api.bulkDeleteAssets(selectedProjectId.value, assetIds);
+    const deleted = new Set(assetIds);
+    assets.value = assets.value.filter((asset) => !deleted.has(asset.id));
+    selectedAssetIds.value = new Set(
+      [...selectedAssetIds.value].filter((id) => !deleted.has(id)),
+    );
+  }
+
   function toggleAsset(assetId: string) {
     const next = new Set(selectedAssetIds.value);
     if (next.has(assetId)) {
@@ -434,6 +446,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     uploadAsset,
     updateAsset,
     deleteAsset,
+    bulkDeleteAssets,
     toggleAsset,
     clearSelection,
     createJob,

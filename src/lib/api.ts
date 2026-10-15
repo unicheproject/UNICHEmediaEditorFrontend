@@ -177,6 +177,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   deleteAsset: (assetId: string) => request<void>(`/assets/${assetId}`, { method: "DELETE" }),
+  bulkDeleteAssets: (projectId: string, assetIds: string[]) =>
+    request<void>(`/projects/${projectId}/assets/bulk-delete`, {
+      method: "POST",
+      body: JSON.stringify({ asset_ids: assetIds }),
+    }),
   listCapabilities: () => request<Capability[]>("/capabilities"),
   createJob: (payload: {
     capability_id: string;

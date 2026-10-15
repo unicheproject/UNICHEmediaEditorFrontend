@@ -41,6 +41,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const playerAsset = ref<Asset | null>(null);
 const assetToDelete = ref<Asset | null>(null);
 const deleting = ref(false);
+const bulkDeleteOpen = ref(false);
+const bulkDeleting = ref(false);
 const assetToRename = ref<Asset | null>(null);
 const renameDraft = ref("");
 const renaming = ref(false);
@@ -186,6 +188,25 @@ async function confirmDeleteAsset() {
   }
 }
 
+async function confirmBulkDelete() {
+  const ids = [...store.selectedAssetIds];
+  if (!ids.length) {
+    return;
+  }
+  bulkDeleting.value = true;
+  try {
+    await store.bulkDeleteAssets(ids);
+    if (playerAsset.value && ids.includes(playerAsset.value.id)) {
+      closePlayer();
+    }
+    bulkDeleteOpen.value = false;
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Unable to delete assets");
+  } finally {
+    bulkDeleting.value = false;
+  }
+}
+
 function openRename(asset: Asset) {
   assetToRename.value = asset;
   renameDraft.value = asset.original_filename;
@@ -252,6 +273,15 @@ async function uploadFiles(event: Event) {
           @click="store.clearSelection"
         >
           Clear selection
+        </Button>
+        <Button
+          v-if="store.selectedAssetIds.size"
+          variant="destructive"
+          size="sm"
+          @click="bulkDeleteOpen = true"
+        >
+          <Trash2 class="h-4 w-4" />
+          Delete all assets
         </Button>
         <input ref="fileInput" class="hidden" type="file" multiple @change="uploadFiles" />
         <Button
@@ -638,6 +668,15 @@ async function uploadFiles(event: Event) {
       confirm-label="Delete asset"
       @close="assetToDelete = null"
       @confirm="confirmDeleteAsset"
+    />
+    <ConfirmDialog
+      :open="bulkDeleteOpen"
+      title="Delete assets"
+      :description="`Delete ${store.selectedAssetIds.size} selected asset${store.selectedAssetIds.size === 1 ? '' : 's'}? This removes them from the project asset list.`"
+      :loading="bulkDeleting"
+      confirm-label="Delete"
+      @close="bulkDeleteOpen = false"
+      @confirm="confirmBulkDelete"
     />
   </section>
 </template>
