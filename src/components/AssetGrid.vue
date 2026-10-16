@@ -134,6 +134,20 @@ function assetDetails(asset: Asset) {
   return parts.join(" · ");
 }
 
+const AI_PROVENANCE_LABELS: Partial<Record<Asset["ai_provenance"], string>> = {
+  generated: "AI generated",
+  modified: "AI modified",
+  inherited: "AI lineage",
+};
+
+function provenanceBadge(asset: Asset): { label: string; variant: "outline" | "success" | "warning" | "neutral"; class: string } {
+  const aiLabel = AI_PROVENANCE_LABELS[asset.ai_provenance];
+  if (aiLabel) return { label: aiLabel, variant: "warning", class: "bg-[#fbf3e6]" };
+  if (asset.provenance_kind === "original") return { label: "Original", variant: "outline", class: "bg-[#f3f4f6]" };
+  if (asset.provenance_kind === "derived") return { label: "Derived", variant: "success", class: "bg-[#e7f1f0]" };
+  return { label: "Unknown", variant: "neutral", class: "" };
+}
+
 function isSelected(asset: Asset) {
   return store.selectedAssetIds.has(asset.id);
 }
@@ -433,15 +447,11 @@ async function uploadFiles(event: Event) {
             {{ mediaLabel(asset.media_type) }}
           </Badge>
           <Badge
-            class="absolute bottom-2 left-2 bg-[#e7f1f0]"
-            :variant="asset.source_asset_id ? 'success' : 'outline'"
-            :class="
-              asset.source_asset_id
-                ? 'bg-[#e7f1f0]'
-                : 'bg-[#f3f4f6]'
-            "
+            class="absolute bottom-2 left-2"
+            :variant="provenanceBadge(asset).variant"
+            :class="provenanceBadge(asset).class"
           >
-            {{ asset.source_asset_id ? "Derived" : "Original" }}
+            {{ provenanceBadge(asset).label }}
           </Badge>
           <Button
             v-if="canPlay(asset)"
@@ -586,10 +596,10 @@ async function uploadFiles(event: Event) {
         </Badge>
         <Badge
           class="shrink-0"
-          :variant="asset.source_asset_id ? 'success' : 'outline'"
-          :class="asset.source_asset_id ? 'bg-[#e7f1f0]' : 'bg-[#f3f4f6]'"
+          :variant="provenanceBadge(asset).variant"
+          :class="provenanceBadge(asset).class"
         >
-          {{ asset.source_asset_id ? "Derived" : "Original" }}
+          {{ provenanceBadge(asset).label }}
         </Badge>
         <div class="flex shrink-0 items-center gap-1">
           <Button

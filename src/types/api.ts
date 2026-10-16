@@ -21,6 +21,9 @@ export interface Organisation {
   name: string;
 }
 
+export type ProvenanceKind = "original" | "derived" | "unknown";
+export type AiProvenance = "none" | "generated" | "modified" | "inherited" | "unknown";
+
 export interface Asset {
   id: string;
   project_id: string;
@@ -36,6 +39,8 @@ export interface Asset {
   storage_path: string;
   checksum_sha256: string;
   source_asset_id: string | null;
+  provenance_kind: ProvenanceKind;
+  ai_provenance: AiProvenance;
   is_intermediate: boolean;
   created_at: string;
   updated_at: string;
